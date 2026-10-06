@@ -85,7 +85,6 @@ pnpm build && pnpm start
 | UI | shadcn/ui（New York） |
 | 图标 | lucide-react |
 | 解析 | 自研 `lib/markdown-parser.ts`（无 marked/remark） |
-| 统计 | 百度统计 + Vercel Analytics |
 
 ---
 
@@ -155,15 +154,6 @@ npm run lint     # ESLint
 
 ---
 
-## 访问统计
-
-生产环境通过 **百度统计** 统计页面访问频率（站点 ID 已写入 `app/layout.tsx`）。  
-若部署在 Vercel，同时启用 `@vercel/analytics`。
-
-本地开发也会加载统计脚本；若需关闭，可临时注释 `layout.tsx` 中的百度 `Script` 段。
-
----
-
 ## SEO / GEO（搜索引擎与大模型发现）
 
 已内置便于收录与引用的能力：
@@ -189,7 +179,7 @@ NEXT_PUBLIC_SITE_URL=https://你的正式域名
 未设置时会依次尝试 `VERCEL_PROJECT_PRODUCTION_URL`、`VERCEL_URL`，否则回退 `http://localhost:3000`。  
 `metadataBase`、canonical、sitemap、结构化数据中的绝对 URL 都依赖该值。
 
-百度站长 / Google Search Console 可提交：`https://你的域名/sitemap.xml`。
+可在搜索引擎站长平台提交：`https://你的域名/sitemap.xml`。
 
 ---
 

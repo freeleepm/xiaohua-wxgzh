@@ -201,8 +201,7 @@ export default function RootLayout({
         />
         {children}
         <Analytics />
-        {/* 百度统计：统计站点访问与使用频率 */}
-        <Script id="baidu-analytics" strategy="afterInteractive">{`
+        <Script id="site-hm" strategy="afterInteractive">{`
 var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
