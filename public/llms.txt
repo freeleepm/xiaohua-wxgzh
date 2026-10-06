@@ -1,0 +1,64 @@
+# 小华同学AI公众号编辑器
+
+> 免费在线 Markdown → 微信公众号排版工具。左侧写 Markdown，右侧实时预览，一键复制带样式富文本并粘贴到微信公众平台图文编辑器。
+
+- 仓库: https://github.com/freeleepm/xiaohua-wxgzh
+- 语言: zh-CN
+- 类型: WebApplication / 浏览器端工具
+- 是否免费: 是
+- 是否需要登录: 否
+- 数据上传: 否（草稿仅存浏览器 localStorage）
+
+## 产品一句话
+
+把 Markdown 转成微信公众号可粘贴的精美 HTML/富文本，解决「写 Markdown 却要在公众号里重排版」的问题。
+
+## 核心能力
+
+- Markdown 实时预览为微信兼容样式
+- 多套主题版式（不只是换色）：小华橙、墨金、青竹、苍青、绛红、书卷等
+- 「复制到公众号」生成带内联样式的富文本
+- 工具栏插入标题、列表、链接、图片、代码块、表格等
+- 撤销/重做；自动保存；历史版本恢复
+- 纯前端，无后端 API
+
+## 适用场景
+
+- 公众号作者用 Markdown 写稿后排版发布
+- 把技术博客 / 文档 Markdown 转为公众号图文
+- 需要稳定主题样式、减少手工调微信编辑器格式
+
+## 使用步骤
+
+1. 打开本站首页
+2. 在左侧粘贴或编写 Markdown
+3. 右侧选择主题并预览
+4. 点击「复制到公众号」
+5. 在微信公众平台图文编辑器中粘贴
+
+## 支持的 Markdown
+
+标题、段落、粗体、斜体、删除线、行内代码、代码块、引用、有序/无序列表、表格、链接、图片、分割线。
+
+## 技术要点（给开发者 / Agent）
+
+- 技术栈: Next.js App Router、TypeScript、Tailwind CSS、自研 markdown-parser
+- 关键: 所有面向微信的样式使用 inline；背景容器优先 section；布局避免依赖 flex
+- 源码入口: components/converter-page.tsx、lib/markdown-parser.ts、lib/wechat-themes.ts
+
+## FAQ
+
+Q: 是否免费？
+A: 免费使用，无需注册。
+
+Q: 内容会上传服务器吗？
+A: 不会。编辑内容保存在用户浏览器本地。
+
+Q: 和普通 Markdown 预览有什么区别？
+A: 目标输出是微信公众号图文编辑器可接受的内联样式 HTML，并处理微信剥离 background/flex 等兼容问题。
+
+## 可选可选文档
+
+- 项目 README 与源码见 GitHub 仓库
+- 机器可读站点地图: /sitemap.xml
+- 爬虫规则: /robots.txt

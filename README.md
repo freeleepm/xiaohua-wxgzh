@@ -160,6 +160,35 @@ npm run lint     # ESLint
 
 ---
 
+## SEO / GEO（搜索引擎与大模型发现）
+
+已内置便于收录与引用的能力：
+
+| 项 | 位置 | 作用 |
+|----|------|------|
+| 完整 Metadata | `app/layout.tsx` / `lib/site-config.ts` | title、description、keywords、canonical、robots |
+| Open Graph / Twitter | 同上 + `app/opengraph-image.tsx` | 社交与部分搜索结果卡片 |
+| JSON-LD | `layout.tsx` | WebSite / WebApplication / FAQ / HowTo |
+| 可抓取正文 | `components/seo-content.tsx` | 对用户视觉隐藏、对爬虫可读的产品说明 |
+| `robots.txt` | `app/robots.ts` | 放行搜索与常见 AI 爬虫 |
+| `sitemap.xml` | `app/sitemap.ts` | 站点地图 |
+| `llms.txt` | `public/llms.txt` | 给大模型 / Agent 的产品说明 |
+| PWA manifest | `public/site.webmanifest` | 应用名与图标 |
+
+部署生产域名后请设置：
+
+```bash
+# .env.local 或托管平台环境变量
+NEXT_PUBLIC_SITE_URL=https://你的正式域名
+```
+
+未设置时会依次尝试 `VERCEL_PROJECT_PRODUCTION_URL`、`VERCEL_URL`，否则回退 `http://localhost:3000`。  
+`metadataBase`、canonical、sitemap、结构化数据中的绝对 URL 都依赖该值。
+
+百度站长 / Google Search Console 可提交：`https://你的域名/sitemap.xml`。
+
+---
+
 ## 部署
 
 任意支持 Next.js 的平台均可，例如：
@@ -173,6 +202,12 @@ npm run build && npm start
 ```
 
 静态资源与逻辑均在前端；注意 HTTPS 与剪贴板权限，以保证「复制到公众号」可用。
+
+建议同步配置：
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://你的正式域名
+```
 
 ---
 
