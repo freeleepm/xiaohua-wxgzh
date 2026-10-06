@@ -1,28 +1,44 @@
 /**
- * 站点 SEO / GEO 共用配置
+ * 站点品牌 / SEO / GEO 共用配置
  * 部署时建议设置 NEXT_PUBLIC_SITE_URL=https://你的域名
  */
 
-export const SITE_NAME = "小华同学AI公众号编辑器"
-export const SITE_NAME_SHORT = "小华同学AI"
-export const SITE_TAGLINE = "Markdown 转微信公众号排版"
+/** 品牌 */
+export const SITE_BRAND = "小华同学 AI"
+
+/** 产品定位（顶栏徽章、短名） */
+export const SITE_PRODUCT = "Markdown 公众号排版"
+
+/**
+ * 完整产品名：浏览器标签、OG、结构化数据主标题
+ * 例：小华同学 AI · Markdown 公众号排版
+ */
+export const SITE_NAME = `${SITE_BRAND} · ${SITE_PRODUCT}`
+
+/** 短名：作者、title template */
+export const SITE_NAME_SHORT = SITE_BRAND
+
+/** 价值主张：放 description，不重复叠进 title */
+export const SITE_TAGLINE = "实时预览微信图文样式，一键复制到公众号编辑器"
 
 export const SITE_DESCRIPTION =
-  "免费在线 Markdown 转微信公众号编辑器。粘贴 Markdown，实时预览多套公众号主题，一键复制带样式的富文本，直接粘贴到微信公众平台图文编辑器。支持标题、列表、表格、代码块、引用，以及自动保存与历史版本。"
+  `${SITE_NAME}：在线将 Markdown 转为微信公众号可粘贴的排版内容。` +
+  "左侧编辑、右侧实时预览多套专业主题，一键复制富文本至微信公众平台图文编辑器。" +
+  "支持标题、列表、表格、代码块与引用，浏览器本地自动保存与历史版本，无需注册。"
 
 export const SITE_KEYWORDS = [
   "Markdown转微信公众号",
-  "公众号编辑器",
-  "Markdown转HTML",
   "微信公众号排版",
   "公众号 Markdown",
-  "md2wx",
-  "小华同学AI",
+  "Markdown 公众号排版",
   "微信图文编辑器",
-  "公众号样式",
-  "Markdown 预览",
+  "Markdown转HTML",
+  "公众号样式主题",
+  "md2wx",
+  "小华同学 AI",
   "一键复制到公众号",
   "微信排版工具",
+  "公众号预览",
 ] as const
 
 export const SITE_REPO = "https://github.com/freeleepm/xiaohua-wxgzh"
@@ -43,7 +59,7 @@ export const getSiteUrl = (): string => {
 /** 供搜索引擎与大模型理解的功能要点 */
 export const SITE_FEATURES = [
   "Markdown 实时转换为微信公众号兼容 HTML",
-  "多套版式主题（小华橙、墨金、青竹、苍青、绛红、书卷等）",
+  "多套专业版式主题（小华橙、墨金、青竹、苍青、绛红、书卷等）",
   "一键复制富文本到微信公众平台图文编辑器，样式尽量保留",
   "编辑工具栏：标题、粗斜体、列表、引用、链接、图片、代码、表格",
   "浏览器本地自动保存与历史版本恢复，无需注册登录",
@@ -52,8 +68,8 @@ export const SITE_FEATURES = [
 
 export const SITE_FAQ = [
   {
-    q: "小华同学AI公众号编辑器是做什么的？",
-    a: "这是一个把 Markdown 转成微信公众号可粘贴排版的在线工具。左侧编辑，右侧预览，点击「复制到公众号」后可直接粘贴进微信图文编辑器。",
+    q: `${SITE_NAME}是做什么的？`,
+    a: "面向公众号作者的在线排版工具：用 Markdown 写作，实时预览微信图文效果，点击「复制到公众号」即可粘贴进微信公众平台图文编辑器。",
   },
   {
     q: "需要安装或注册吗？",

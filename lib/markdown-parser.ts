@@ -1,7 +1,7 @@
 /**
  * Lightweight Markdown → WeChat-compatible HTML parser
  * All styles are inline for maximum compatibility with WeChat editor
- * 作者：小华同学AI
+ * 作者：小华同学 AI
  *
  * 解析顺序不要改；外观全部走 wechat-render + 当前主题。
  */

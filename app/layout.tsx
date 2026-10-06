@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    default: SITE_NAME,
     template: `%s · ${SITE_NAME_SHORT}`,
   },
   description: SITE_DESCRIPTION,
@@ -67,13 +67,13 @@ export const metadata: Metadata = {
     locale: "zh_CN",
     url: siteUrl,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
+    title: SITE_NAME,
+    description: `${SITE_TAGLINE}。${SITE_DESCRIPTION}`,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
+    title: SITE_NAME,
+    description: `${SITE_TAGLINE}。${SITE_DESCRIPTION}`,
   },
   icons: {
     icon: [
@@ -154,8 +154,7 @@ const jsonLd = {
     {
       "@type": "HowTo",
       name: "如何用 Markdown 排版并复制到微信公众号",
-      description:
-        "使用小华同学AI公众号编辑器，将 Markdown 转为可粘贴进微信图文编辑器的带样式内容。",
+      description: `使用${SITE_NAME}，将 Markdown 转为可粘贴进微信图文编辑器的带样式内容。`,
       inLanguage: "zh-CN",
       totalTime: "PT2M",
       step: [

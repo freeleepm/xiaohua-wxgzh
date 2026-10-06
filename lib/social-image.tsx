@@ -50,24 +50,24 @@ export function createSocialImage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
-              fontSize: 64,
-              fontWeight: 760,
-              lineHeight: 1.15,
-              letterSpacing: "-0.03em",
-              maxWidth: 920,
+              fontSize: 52,
+              fontWeight: 700,
+              lineHeight: 1.2,
+              letterSpacing: "-0.02em",
+              maxWidth: 960,
             }}
           >
-            公众号编辑器
+            Markdown 公众号排版
           </div>
           <div
             style={{
-              fontSize: 30,
+              fontSize: 28,
               color: "#7C2D12",
-              lineHeight: 1.4,
-              maxWidth: 880,
+              lineHeight: 1.45,
+              maxWidth: 900,
             }}
           >
-            Markdown 实时转微信公众号排版 · 多主题 · 一键复制
+            实时预览微信图文样式 · 专业主题 · 一键复制到公众号
           </div>
         </div>
 

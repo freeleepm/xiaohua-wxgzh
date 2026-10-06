@@ -16,6 +16,7 @@ import {
   isThemeId,
   type ThemeId,
 } from "@/lib/wechat-themes"
+import { SITE_BRAND, SITE_PRODUCT } from "@/lib/site-config"
 import {
   Copy,
   Trash2,
@@ -158,18 +159,18 @@ export function ConverterPage() {
               className="font-semibold tracking-tight text-sm"
               style={{ color: "var(--tool-editor-text)" }}
             >
-              小华同学ai
+              {SITE_BRAND}
             </span>
             <span
-              className="text-xs font-semibold tracking-wide px-2.5 py-1 rounded-md"
+              className="text-xs font-medium tracking-wide px-2.5 py-1 rounded-md"
               style={{
                 color: "#fff",
                 background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
                 boxShadow: "0 1px 3px rgba(232, 93, 4, 0.28)",
-                letterSpacing: "0.04em",
+                letterSpacing: "0.02em",
               }}
             >
-              公众号编辑器
+              {SITE_PRODUCT}
             </span>
           </span>
         </div>
