@@ -4,9 +4,9 @@
 
 纯前端单页应用，无后端、无登录；草稿自动保存在浏览器本地。
 
+- **官方演示**：[https://wx.leepm.com](https://wx.leepm.com)（可直接在线使用）
 - 出品：[学天科技](https://xuetian.ai)
 - 仓库：https://github.com/freeleepm/xiaohua-wxgzh
-
 
 ---
 
