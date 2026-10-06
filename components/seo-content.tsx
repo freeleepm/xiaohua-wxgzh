@@ -1,8 +1,11 @@
 import {
+  SITE_ABOUT,
   SITE_DESCRIPTION,
   SITE_FAQ,
   SITE_FEATURES,
+  SITE_FRIEND_LINKS,
   SITE_NAME,
+  SITE_ORG,
   SITE_TAGLINE,
 } from "@/lib/site-config"
 
@@ -21,6 +24,15 @@ export function SeoContent() {
         {SITE_NAME} — {SITE_TAGLINE}
       </h1>
       <p>{SITE_DESCRIPTION}</p>
+      <p>{SITE_ABOUT}</p>
+      <p>
+        出品方：{SITE_ORG}。友情链接：
+        {SITE_FRIEND_LINKS.map((link) => (
+          <a key={link.url} href={link.url} rel="noopener noreferrer">
+            {link.name}
+          </a>
+        ))}
+      </p>
 
       <h2>核心功能</h2>
       <ul>

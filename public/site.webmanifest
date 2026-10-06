@@ -1,7 +1,7 @@
 {
-  "name": "小华同学 AI · Markdown 公众号排版",
-  "short_name": "小华 Markdown 排版",
-  "description": "将 Markdown 转为微信公众号可粘贴排版，实时预览，一键复制到图文编辑器。",
+  "name": "小华同学 AI 公众号排版工具",
+  "short_name": "小华公众号排版",
+  "description": "学天科技旗下公众号工具。Markdown 实时预览，一键复制到微信图文编辑器。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF7ED",

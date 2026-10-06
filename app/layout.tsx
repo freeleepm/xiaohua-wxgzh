@@ -6,9 +6,12 @@ import {
   SITE_DESCRIPTION,
   SITE_FEATURES,
   SITE_FAQ,
+  SITE_FRIEND_LINKS,
   SITE_KEYWORDS,
   SITE_NAME,
   SITE_NAME_SHORT,
+  SITE_ORG,
+  SITE_ORG_URL,
   SITE_REPO,
   SITE_TAGLINE,
   getSiteUrl,
@@ -110,9 +113,9 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      name: SITE_NAME_SHORT,
-      url: siteUrl,
-      sameAs: [SITE_REPO],
+      name: SITE_ORG,
+      url: SITE_ORG_URL,
+      sameAs: [SITE_ORG_URL, SITE_REPO],
     },
     {
       "@type": "WebApplication",
@@ -126,6 +129,8 @@ const jsonLd = {
       browserRequirements: "Requires JavaScript and HTML5",
       inLanguage: "zh-CN",
       isAccessibleForFree: true,
+      provider: { "@id": `${siteUrl}/#organization` },
+      publisher: { "@id": `${siteUrl}/#organization` },
       offers: {
         "@type": "Offer",
         price: "0",
@@ -136,7 +141,7 @@ const jsonLd = {
       codeRepository: SITE_REPO,
       softwareHelp: {
         "@type": "WebPage",
-        url: SITE_REPO,
+        url: SITE_ORG_URL,
       },
     },
     {

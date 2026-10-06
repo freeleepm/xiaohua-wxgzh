@@ -1,6 +1,6 @@
-export const SAMPLE_MARKDOWN = `# 小华同学 AI · Markdown 公众号排版示例
+export const SAMPLE_MARKDOWN = `# 小华同学 AI 公众号排版工具
 
-这是 **小华同学 AI** 的公众号 Markdown 排版示例：左侧用 Markdown 写作，右侧实时预览微信图文效果，点击「复制到公众号」即可粘贴进微信公众平台。
+**学天科技**旗下公众号工具示例：左侧用 Markdown 写作，右侧实时预览微信图文效果，点击「复制到公众号」即可粘贴进微信公众平台。
 
 ## 适用场景
 

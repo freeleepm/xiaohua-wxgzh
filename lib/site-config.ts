@@ -6,38 +6,49 @@
 /** 品牌 */
 export const SITE_BRAND = "小华同学 AI"
 
-/** 产品定位（顶栏徽章、短名） */
-export const SITE_PRODUCT = "Markdown 公众号排版"
+/** 产品定位（顶栏徽章） */
+export const SITE_PRODUCT = "公众号排版工具"
 
 /**
  * 完整产品名：浏览器标签、OG、结构化数据主标题
- * 例：小华同学 AI · Markdown 公众号排版
+ * 参考：小华同学 AI 公众号排版工具
  */
-export const SITE_NAME = `${SITE_BRAND} · ${SITE_PRODUCT}`
+export const SITE_NAME = `${SITE_BRAND} ${SITE_PRODUCT}`
 
 /** 短名：作者、title template */
 export const SITE_NAME_SHORT = SITE_BRAND
 
-/** 价值主张：放 description，不重复叠进 title */
-export const SITE_TAGLINE = "实时预览微信图文样式，一键复制到公众号编辑器"
+/** 价值主张 */
+export const SITE_TAGLINE = "Markdown 实时预览，一键复制到微信公众号图文编辑器"
+
+/** 所属主体 */
+export const SITE_ORG = "学天科技"
+export const SITE_ORG_URL = "https://xuetian.ai"
+
+/** 一句话归属说明 */
+export const SITE_ABOUT =
+  `${SITE_NAME}是${SITE_ORG}旗下的公众号写作与排版工具，帮助作者用 Markdown 高效完成微信图文排版。`
+
+/** 友情链接（展示用） */
+export const SITE_FRIEND_LINKS = [
+  { name: "学天科技", url: SITE_ORG_URL, desc: "官网" },
+] as const
 
 export const SITE_DESCRIPTION =
-  `${SITE_NAME}：在线将 Markdown 转为微信公众号可粘贴的排版内容。` +
-  "左侧编辑、右侧实时预览多套专业主题，一键复制富文本至微信公众平台图文编辑器。" +
-  "支持标题、列表、表格、代码块与引用，浏览器本地自动保存与历史版本，无需注册。"
+  `${SITE_ABOUT}` +
+  "支持多套专业主题、富文本一键复制至微信公众平台，浏览器本地自动保存，无需注册。"
 
 export const SITE_KEYWORDS = [
+  "小华同学 AI",
+  "公众号排版工具",
   "Markdown转微信公众号",
   "微信公众号排版",
   "公众号 Markdown",
-  "Markdown 公众号排版",
+  "学天科技",
   "微信图文编辑器",
   "Markdown转HTML",
-  "公众号样式主题",
   "md2wx",
-  "小华同学 AI",
   "一键复制到公众号",
-  "微信排版工具",
   "公众号预览",
 ] as const
 
@@ -56,7 +67,6 @@ export const getSiteUrl = (): string => {
   return "http://localhost:3000"
 }
 
-/** 供搜索引擎与大模型理解的功能要点 */
 export const SITE_FEATURES = [
   "Markdown 实时转换为微信公众号兼容 HTML",
   "多套专业版式主题（小华橙、墨金、青竹、苍青、绛红、书卷等）",
@@ -64,12 +74,17 @@ export const SITE_FEATURES = [
   "编辑工具栏：标题、粗斜体、列表、引用、链接、图片、代码、表格",
   "浏览器本地自动保存与历史版本恢复，无需注册登录",
   "纯前端运行，内容不上传服务器",
+  `${SITE_ORG}旗下产品，官网 ${SITE_ORG_URL}`,
 ] as const
 
 export const SITE_FAQ = [
   {
     q: `${SITE_NAME}是做什么的？`,
-    a: "面向公众号作者的在线排版工具：用 Markdown 写作，实时预览微信图文效果，点击「复制到公众号」即可粘贴进微信公众平台图文编辑器。",
+    a: `${SITE_ABOUT}左侧编辑 Markdown，右侧实时预览，点击「复制到公众号」即可粘贴进微信图文编辑器。`,
+  },
+  {
+    q: "和学天科技是什么关系？",
+    a: `本工具由${SITE_ORG}出品，是其旗下的公众号排版产品。了解更多请访问 ${SITE_ORG_URL}。`,
   },
   {
     q: "需要安装或注册吗？",

@@ -16,7 +16,12 @@ import {
   isThemeId,
   type ThemeId,
 } from "@/lib/wechat-themes"
-import { SITE_BRAND, SITE_PRODUCT } from "@/lib/site-config"
+import {
+  SITE_BRAND,
+  SITE_FRIEND_LINKS,
+  SITE_ORG,
+  SITE_PRODUCT,
+} from "@/lib/site-config"
 import {
   Copy,
   Trash2,
@@ -154,23 +159,31 @@ export function ConverterPage() {
           >
             <Zap size={14} color="#fff" strokeWidth={2.5} />
           </div>
-          <span className="flex items-center gap-2">
-            <span
-              className="font-semibold tracking-tight text-sm"
-              style={{ color: "var(--tool-editor-text)" }}
-            >
-              {SITE_BRAND}
+          <span className="flex flex-col gap-0.5 min-w-0">
+            <span className="flex items-center gap-2">
+              <span
+                className="font-semibold tracking-tight text-sm"
+                style={{ color: "var(--tool-editor-text)" }}
+              >
+                {SITE_BRAND}
+              </span>
+              <span
+                className="text-xs font-medium tracking-wide px-2.5 py-1 rounded-md shrink-0"
+                style={{
+                  color: "#fff",
+                  background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
+                  boxShadow: "0 1px 3px rgba(232, 93, 4, 0.28)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {SITE_PRODUCT}
+              </span>
             </span>
             <span
-              className="text-xs font-medium tracking-wide px-2.5 py-1 rounded-md"
-              style={{
-                color: "#fff",
-                background: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
-                boxShadow: "0 1px 3px rgba(232, 93, 4, 0.28)",
-                letterSpacing: "0.02em",
-              }}
+              className="hidden sm:block text-[10px] leading-none truncate"
+              style={{ color: "var(--tool-label-text)" }}
             >
-              {SITE_PRODUCT}
+              {SITE_ORG}旗下公众号工具
             </span>
           </span>
         </div>
@@ -299,10 +312,31 @@ export function ConverterPage() {
           onRemove={removeVersion}
         />
         <span
-          className="ml-auto hidden md:block"
-          style={{ color: "var(--tool-label-text)", opacity: 0.7 }}
+          className="ml-auto hidden lg:flex items-center gap-3 min-w-0"
+          style={{ color: "var(--tool-label-text)" }}
         >
-          点击「复制到公众号」→ 直接粘贴至公众号图文编辑器
+          <span className="truncate opacity-80">
+            {SITE_ORG}旗下 · 点击「复制到公众号」即可粘贴图文
+          </span>
+          <span className="opacity-40 shrink-0" aria-hidden>
+            |
+          </span>
+          <span className="shrink-0 flex items-center gap-1.5">
+            <span className="opacity-70">友情链接</span>
+            {SITE_FRIEND_LINKS.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium underline-offset-2 hover:underline"
+                style={{ color: "var(--brand)" }}
+                title={link.desc}
+              >
+                {link.name}
+              </a>
+            ))}
+          </span>
         </span>
       </div>
 

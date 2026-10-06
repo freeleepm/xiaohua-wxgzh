@@ -50,24 +50,24 @@ export function createSocialImage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div
             style={{
-              fontSize: 52,
+              fontSize: 48,
               fontWeight: 700,
               lineHeight: 1.2,
               letterSpacing: "-0.02em",
-              maxWidth: 960,
+              maxWidth: 980,
             }}
           >
-            Markdown 公众号排版
+            公众号排版工具
           </div>
           <div
             style={{
-              fontSize: 28,
+              fontSize: 26,
               color: "#7C2D12",
               lineHeight: 1.45,
               maxWidth: 900,
             }}
           >
-            实时预览微信图文样式 · 专业主题 · 一键复制到公众号
+            学天科技旗下 · Markdown 实时预览 · 一键复制到微信图文
           </div>
         </div>
 
