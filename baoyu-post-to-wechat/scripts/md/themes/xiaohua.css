@@ -1,0 +1,433 @@
+/**
+ * MD 小华同学主题 (xiaohua)
+ * 公众号专属样式 - 橙色暖调，清新现代
+ * 作者：小华同学AI
+ * 如需使用主题色，请使用 var(--md-primary-color) 代替颜色值
+ */
+
+/* ==================== 一级标题 ==================== */
+h1 {
+  display: block;
+  margin: 10px 0 28px;
+  background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+  border-radius: 10px;
+  padding: 22px 24px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+  text-align: left;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* ==================== 二级标题 ==================== */
+/* 居中，渐变底线（用内层 span 的 background-image 实现，避免 ::after 在微信中失效） */
+h2 {
+  display: block;
+  margin: 32px 0 14px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #18181b;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* 渐变底线：span 用 background-image 模拟 1px 底线，juice 内联后微信可正常显示 */
+h2 > span {
+  display: inline-block;
+  padding: 0 4px 10px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--md-primary-color) 20%,
+    var(--md-primary-color) 80%,
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  background-size: 100% 1px;
+}
+
+/* ==================== 三级标题 ==================== */
+/* inline 浅橙渐变背景块，只包裹文字宽度 */
+h3 {
+  display: inline-block;
+  background: linear-gradient(to right, #FFF1E9, #FFFBF7);
+  color: #C2410C;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  margin: 20px 0 10px;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* ==================== 四级标题 ==================== */
+h4 {
+  margin: 22px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #52525b;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* ==================== 五级标题 ==================== */
+h5 {
+  margin: 18px 0 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #71717a;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* ==================== 六级标题 ==================== */
+h6 {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #a1a1aa;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+}
+
+/* ==================== 段落 ==================== */
+p {
+  margin: 0 0 16px;
+  line-height: 1.9;
+  color: #3f3f46;
+  font-size: 15px;
+}
+
+/* ==================== 引用块 ==================== */
+blockquote {
+  background: #fffbf5;
+  border-radius: 8px;
+  margin: 20px 0;
+  padding: 16px 20px;
+  border: 1px solid #fed7aa;
+}
+
+blockquote > p {
+  margin: 0;
+  color: #92400e;
+  line-height: 1.85;
+  font-size: 14.5px;
+  font-style: italic;
+}
+
+/* ==================== 代码块容器 ==================== */
+pre.code__pre,
+section.code__pre,
+.code__pre {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2a2a2e;
+  padding: 0 !important;
+  margin: 24px 0;
+  background: #1a1a1a;
+  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', 'Courier New', monospace;
+  box-shadow: none;
+  white-space: normal; /* 让外层 pre 不强制折行，由内层 code 控制 */
+}
+
+/* macOS 标题栏：强制 block 确保微信兼容（微信会剥离 display:flex） */
+.code__pre > .mac-sign {
+  display: block !important;
+  background: #1c1c1e;
+  padding: 10px 16px;
+  border-bottom: 1px solid #2a2a2e;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  line-height: 13px;
+}
+
+/* 语言标签（右侧浮动） */
+.code__pre > .mac-sign .lang-label {
+  float: right;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  font-size: 11px;
+  color: #8b8b9e;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  line-height: 13px;
+}
+
+/* macOS 红绿灯圆点（左侧浮动） */
+.code__pre > .mac-sign .mac-dots {
+  float: left;
+  line-height: 13px;
+}
+
+/* 代码内容区（显式清除行内 code 规则的 border/border-radius） */
+.code__pre > code {
+  display: block;
+  padding: 20px 22px !important;
+  overflow-x: auto;
+  text-indent: 0;
+  color: #e2e8f0;
+  background: #1a1a1a;
+  white-space: pre;        /* 保持代码不折行，横向滚动 */
+  word-break: normal;
+  word-wrap: normal;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', 'Courier New', monospace;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ==================== 行内代码 ==================== */
+code {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  font-family: 'Menlo', 'Consolas', monospace;
+  border: 1px solid #e2e8f0;
+}
+
+/* ==================== 图片 ==================== */
+img {
+  display: block;
+  max-width: 100%;
+  margin: 18px auto;
+  border-radius: 8px;
+}
+
+/* ==================== 列表 ==================== */
+ul {
+  list-style: none;
+  padding-left: 4px;
+  margin: 14px 0;
+}
+
+ol {
+  list-style: none;
+  padding-left: 4px;
+  margin: 14px 0;
+}
+
+li {
+  display: block;
+  margin: 7px 0;
+  color: #3f3f46;
+  line-height: 1.75;
+  overflow: hidden; /* 配合 float 前缀清除浮动 */
+}
+
+ul > li {
+  color: #3f3f46;
+}
+
+ol > li {
+  color: #3f3f46;
+}
+
+/* 列表前缀 span（renderer.ts 输出 class="list-prefix--unordered/ordered"）
+   用 float:left 而非 inline-block/vertical-align，微信不会让它换行 */
+.list-prefix--unordered {
+  float: left;
+  color: #E85D04;
+  font-size: 8px;
+  margin-right: 8px;
+  line-height: 26px; /* 与文字行高对齐（15px * 1.75 ≈ 26px），使圆点垂直居中 */
+}
+
+.list-prefix--ordered {
+  float: left;
+  min-width: 22px;
+  height: 22px;
+  background: #E85D04;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 22px;
+  margin-right: 10px;
+}
+
+/* 列表文字内容区（renderer.ts 输出 class="list-content"）*/
+.list-content {
+  display: block;
+  overflow: hidden;
+  color: #3f3f46;
+}
+
+/* ==================== 脚注 ==================== */
+p.footnotes {
+  margin: 0.5em 8px;
+  font-size: 80%;
+  color: hsl(var(--foreground));
+}
+
+/* ==================== 图表 ==================== */
+figure {
+  margin: 18px 0;
+  text-align: center;
+}
+
+figcaption,
+.md-figcaption {
+  text-align: center;
+  color: #888;
+  font-size: 0.8em;
+}
+
+/* ==================== 分隔线（左右渐变细线） ==================== */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d1d5db 20%, #d1d5db 80%, transparent);
+  margin: 36px 0;
+}
+
+/* ==================== 行内强调 ==================== */
+em {
+  font-style: italic;
+  color: #52525b;
+}
+
+/* ==================== 粗体 ==================== */
+strong {
+  font-weight: 700;
+  color: #09090b;
+}
+
+/* 粗体 + 斜体同时使用（***文字***） */
+strong > em,
+em > strong {
+  font-weight: 800;
+  font-style: italic;
+}
+
+/* ==================== 链接 ==================== */
+a {
+  color: var(--md-primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 93, 4, 0.35);
+  font-weight: 500;
+}
+
+/* ==================== 表格 ==================== */
+section.table-wrapper {
+  margin: 22px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-spacing: 0;
+  border: 1px solid #f0f0f2;
+}
+
+thead {
+  font-weight: 600;
+}
+
+th {
+  padding: 10px 16px;
+  background: var(--md-primary-color);
+  color: #fff;
+  font-weight: 700;
+  text-align: left;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  line-height: 1.65;
+  word-break: keep-all;
+  border: 1px solid var(--md-primary-color);
+}
+
+td {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #3f3f46;
+  line-height: 1.65;
+  border-top: 1px solid #f0f0f2;
+  word-break: keep-all;
+}
+
+/* ==================== KaTeX 公式 ==================== */
+.katex-inline {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.katex-block {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5em 0;
+  text-align: center;
+}
+
+/* ==================== 标记高亮 ==================== */
+.markup-highlight {
+  background-color: var(--md-primary-color);
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: #fff;
+}
+
+.markup-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--md-primary-color);
+}
+
+.markup-wavyline {
+  text-decoration: underline wavy;
+  text-decoration-color: var(--md-primary-color);
+  text-decoration-thickness: 2px;
+}
+
+/* ==================== highlight.js 语法高亮 One Dark 主题 ==================== */
+.hljs-keyword        { color: #c678dd; }
+.hljs-built_in       { color: #e06c75; }
+.hljs-type           { color: #e5c07b; }
+.hljs-literal        { color: #56b6c2; }
+.hljs-number         { color: #d19a66; }
+.hljs-operator       { color: #56b6c2; }
+.hljs-punctuation    { color: #abb2bf; }
+.hljs-property       { color: #e06c75; }
+.hljs-regexp         { color: #98c379; }
+.hljs-string         { color: #98c379; }
+.hljs-subst          { color: #abb2bf; }
+.hljs-symbol         { color: #61afef; }
+.hljs-class          { color: #e5c07b; }
+.hljs-function       { color: #61afef; }
+.hljs-title          { color: #61afef; }
+.hljs-title\.class_  { color: #e5c07b; }
+.hljs-title\.function_ { color: #61afef; }
+.hljs-params         { color: #abb2bf; }
+.hljs-comment        { color: #5c6370; }
+.hljs-doctag         { color: #c678dd; }
+.hljs-meta           { color: #e06c75; }
+.hljs-section        { color: #61afef; }
+.hljs-tag            { color: #e06c75; }
+.hljs-name           { color: #e06c75; }
+.hljs-attr           { color: #d19a66; }
+.hljs-attribute      { color: #d19a66; }
+.hljs-variable       { color: #e06c75; }
+.hljs-bullet         { color: #61afef; }
+.hljs-code           { color: #98c379; }
+.hljs-emphasis       { color: #e06c75; }
+.hljs-strong         { color: #e5c07b; }
+.hljs-link           { color: #56b6c2; }
+.hljs-quote          { color: #5c6370; }
+.hljs-selector-tag   { color: #e06c75; }
+.hljs-selector-id    { color: #61afef; }
+.hljs-selector-class { color: #d19a66; }
+.hljs-addition       { color: #98c379; }
+.hljs-deletion       { color: #e06c75; }

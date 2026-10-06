@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Professional light SaaS theme — orange accent */
+  --background: oklch(0.99 0.002 60);
+  --foreground: oklch(0.14 0.01 40);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.14 0.01 40);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0.01 40);
+  --primary: oklch(0.62 0.21 38);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.005 50);
+  --secondary-foreground: oklch(0.28 0.015 40);
+  --muted: oklch(0.955 0.005 55);
+  --muted-foreground: oklch(0.52 0.015 45);
+  --accent: oklch(0.965 0.025 48);
+  --accent-foreground: oklch(0.62 0.21 38);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.91 0.008 50);
+  --input: oklch(0.91 0.008 50);
+  --ring: oklch(0.62 0.21 38);
+  --chart-1: oklch(0.62 0.21 38);
+  --chart-2: oklch(0.7 0.16 52);
+  --chart-3: oklch(0.52 0.14 35);
+  --chart-4: oklch(0.76 0.13 62);
+  --chart-5: oklch(0.58 0.2 28);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.975 0.004 55);
+  --sidebar-foreground: oklch(0.14 0.01 40);
+  --sidebar-primary: oklch(0.62 0.21 38);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.955 0.01 50);
+  --sidebar-accent-foreground: oklch(0.14 0.01 40);
+  --sidebar-border: oklch(0.91 0.008 50);
+  --sidebar-ring: oklch(0.62 0.21 38);
+  /* tool-specific design tokens */
+  --tool-header-bg: oklch(1 0 0);
+  --tool-header-border: oklch(0.91 0.008 50);
+  --tool-editor-bg: oklch(0.975 0.003 55);
+  --tool-editor-text: oklch(0.16 0.015 40);
+  --tool-editor-placeholder: oklch(0.65 0.01 50);
+  --tool-divider: oklch(0.91 0.008 50);
+  --tool-preview-bg: oklch(1 0 0);
+  --tool-label-text: oklch(0.48 0.015 45);
+  --tool-panel-header: oklch(0.97 0.004 52);
+  --brand: #E85D04;
+  --brand-light: #FFF1E9;
+  --brand-mid: #FFA46A;
+}
+
+.dark {
+  --background: oklch(0.99 0.002 60);
+  --foreground: oklch(0.14 0.01 40);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.14 0.01 40);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0.01 40);
+  --primary: oklch(0.62 0.21 38);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.005 50);
+  --secondary-foreground: oklch(0.28 0.015 40);
+  --muted: oklch(0.955 0.005 55);
+  --muted-foreground: oklch(0.52 0.015 45);
+  --accent: oklch(0.965 0.025 48);
+  --accent-foreground: oklch(0.62 0.21 38);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.91 0.008 50);
+  --input: oklch(0.91 0.008 50);
+  --ring: oklch(0.62 0.21 38);
+  --chart-1: oklch(0.62 0.21 38);
+  --chart-2: oklch(0.7 0.16 52);
+  --chart-3: oklch(0.52 0.14 35);
+  --chart-4: oklch(0.76 0.13 62);
+  --chart-5: oklch(0.58 0.2 28);
+  --sidebar: oklch(0.975 0.004 55);
+  --sidebar-foreground: oklch(0.14 0.01 40);
+  --sidebar-primary: oklch(0.62 0.21 38);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.955 0.01 50);
+  --sidebar-accent-foreground: oklch(0.14 0.01 40);
+  --sidebar-border: oklch(0.91 0.008 50);
+  --sidebar-ring: oklch(0.62 0.21 38);
+}
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 预览区域隔离：重置 Tailwind preflight 对 table 元素的干扰 */
+.wechat-preview-container th,
+.wechat-preview-container td,
+.wechat-preview-container table,
+.wechat-preview-container tr,
+.wechat-preview-container thead,
+.wechat-preview-container tbody {
+  border: none;
+  border-color: transparent;
+  border-width: 0;
+  margin: 0;
+  padding: 0;
+}

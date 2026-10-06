@@ -1,0 +1,37 @@
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.npmrc
+.snowflake/
+.v0-trash/
+.vercel/
+next.user-config.*
+
+# Environment variables
+.env
+.env*.local
+
+# Dependencies & build
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+.cursor/
+.claude/
+.firecrawl/
+
+# Archives / local dumps
+*.zip
+baoyu-post-to-wechat.zip
+
+# Nested skill deps (if present)
+baoyu-post-to-wechat/**/node_modules/
+baoyu-post-to-wechat/**/bun.lock
