@@ -1,34 +1,25 @@
 "use client"
 
 import { useMemo } from "react"
-import {
-  renderSourceToWechat,
-  type SourceMode,
-} from "@/lib/content-render"
-import type { HtmlStylePolicy } from "@/lib/html-to-wechat"
+import { renderSourceToWechat, type SourceMode } from "@/lib/content-render"
 import { DEFAULT_THEME_ID, getTheme, type ThemeId } from "@/lib/wechat-themes"
 
 interface WechatPreviewProps {
   source: string
   mode?: SourceMode
   themeId?: ThemeId
-  htmlStylePolicy?: HtmlStylePolicy
 }
 
 export function WechatPreview({
   source,
   mode = "markdown",
   themeId = DEFAULT_THEME_ID,
-  htmlStylePolicy = "preserve",
 }: WechatPreviewProps) {
   const theme = getTheme(themeId)
   const html = useMemo(
-    () => renderSourceToWechat(source, mode, themeId, htmlStylePolicy),
-    [source, mode, themeId, htmlStylePolicy],
+    () => renderSourceToWechat(source, mode, themeId),
+    [source, mode, themeId],
   )
-
-  const preserveCustom =
-    mode === "html" && htmlStylePolicy === "preserve"
 
   if (!source.trim()) {
     return (
@@ -71,7 +62,7 @@ export function WechatPreview({
             style={{ color: "var(--tool-label-text)" }}
           >
             {mode === "html"
-              ? "默认保留 HTML 自定义主题，并做微信兼容处理后可复制发布"
+              ? "保留 HTML 自定义样式，微信兼容处理后可复制发布"
               : "右侧将实时预览微信公众号排版效果，可一键复制发布"}
           </p>
         </div>
@@ -84,7 +75,8 @@ export function WechatPreview({
       className="wechat-preview-container"
       style={{
         padding: "32px 36px 56px",
-        fontFamily: preserveCustom ? undefined : theme.font,
+        // HTML 用原文样式；Markdown 用站点主题字体
+        fontFamily: mode === "html" ? undefined : theme.font,
         background: "var(--tool-preview-bg)",
         minHeight: "100%",
       }}

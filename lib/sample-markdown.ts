@@ -37,7 +37,7 @@ const html = parseMarkdownToHTML(draft)
 写完后切换主题确认版式，再复制到公众号发布即可。
 `
 
-/** HTML 源码示例：自带 CSS 主题，默认「保留原文样式」 */
+/** HTML 源码示例：自带 CSS 主题（HTML 模式不套用站点主题） */
 export const SAMPLE_HTML = `<style>
   .xt-wrap { color: #1f2937; font-size: 15px; line-height: 1.8; }
   .xt-title {
@@ -70,19 +70,19 @@ export const SAMPLE_HTML = `<style>
 </style>
 <section class="xt-wrap">
   <h1 class="xt-title">小华同学 AI · HTML 自定义主题示例</h1>
-  <p class="xt-p"><strong>学天科技</strong>旗下工具：粘贴<strong class="xt-em">已带样式</strong>的 HTML，默认保留原文主题，并转换为微信可粘贴结构。</p>
+  <p class="xt-p"><strong>学天科技</strong>旗下工具：粘贴<strong class="xt-em">已带样式</strong>的 HTML，保留原文主题，转换为微信可粘贴结构。</p>
   <h2 class="xt-h2">适用场景</h2>
   <ul class="xt-list">
     <li>博客 / 文档导出的带 CSS 主题 HTML</li>
-    <li>运营已定稿的富文本，不想被站点主题覆盖</li>
-    <li>需要时再切换「站点主题」统一换肤</li>
+    <li>运营已定稿的富文本，需要原样进公众号</li>
+    <li>与 Markdown 模式分开：站点主题只给 Markdown 用</li>
   </ul>
-  <blockquote class="xt-quote">流程：HTML 模式 → 保留原文 → 预览 → 复制到公众号。</blockquote>
+  <blockquote class="xt-quote">流程：HTML 模式 → 粘贴源码 → 预览 → 复制到公众号。</blockquote>
   <h2 class="xt-h2">推荐流程</h2>
   <ol class="xt-list">
     <li>切换到 HTML 模式</li>
     <li>粘贴含 &lt;style&gt; 或内联 style 的源码</li>
-    <li>确认「保留原文」，再复制发布</li>
+    <li>预览确认后复制发布</li>
   </ol>
 </section>
 `

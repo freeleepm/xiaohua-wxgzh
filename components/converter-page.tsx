@@ -5,11 +5,6 @@ import { MarkdownEditor } from "@/components/markdown-editor"
 import { WechatPreview } from "@/components/wechat-preview"
 import { ThemePicker } from "@/components/theme-picker"
 import { renderSourceToWechat, isSourceMode, SOURCE_MODE_KEY, type SourceMode } from "@/lib/content-render"
-import {
-  HTML_STYLE_POLICY_KEY,
-  isHtmlStylePolicy,
-  type HtmlStylePolicy,
-} from "@/lib/html-to-wechat"
 import { SAMPLE_HTML, SAMPLE_MARKDOWN } from "@/lib/sample-markdown"
 import { loadCurrentDraft } from "@/lib/draft-versions"
 import { useTextHistory } from "@/hooks/use-text-history"
@@ -56,16 +51,12 @@ export function ConverterPage() {
   const [copied, setCopied] = useState<"idle" | "rich" | "code">("idle")
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME_ID)
   const [sourceMode, setSourceMode] = useState<SourceMode>("markdown")
-  const [htmlStylePolicy, setHtmlStylePolicy] =
-    useState<HtmlStylePolicy>("preserve")
 
   useEffect(() => {
     const saved = window.localStorage.getItem("md2wx-wechat-theme")
     if (saved && isThemeId(saved)) setThemeId(saved)
     const mode = window.localStorage.getItem(SOURCE_MODE_KEY)
     if (mode && isSourceMode(mode)) setSourceMode(mode)
-    const policy = window.localStorage.getItem(HTML_STYLE_POLICY_KEY)
-    if (policy && isHtmlStylePolicy(policy)) setHtmlStylePolicy(policy)
   }, [])
 
   useEffect(() => {
@@ -96,29 +87,21 @@ export function ConverterPage() {
     window.localStorage.setItem(SOURCE_MODE_KEY, mode)
   }, [])
 
-  const handleHtmlStylePolicyChange = useCallback((policy: HtmlStylePolicy) => {
-    setHtmlStylePolicy(policy)
-    window.localStorage.setItem(HTML_STYLE_POLICY_KEY, policy)
-  }, [])
-
   const triggerCopied = (type: "rich" | "code") => {
     setCopied(type)
     setTimeout(() => setCopied("idle"), 2500)
   }
 
   const buildWechatHtml = useCallback(
-    () => renderSourceToWechat(source, sourceMode, themeId, htmlStylePolicy),
-    [source, sourceMode, themeId, htmlStylePolicy],
+    () => renderSourceToWechat(source, sourceMode, themeId),
+    [source, sourceMode, themeId],
   )
 
   const handleCopyRich = useCallback(async () => {
     const html = buildWechatHtml()
     const theme = getTheme(themeId)
-    // 保留自定义主题时不强制站点字体，避免冲掉原文排版
-    const font =
-      sourceMode === "html" && htmlStylePolicy === "preserve"
-        ? "inherit"
-        : theme.font
+    // HTML 保留自定义样式，不强制站点字体
+    const font = sourceMode === "html" ? "inherit" : theme.font
 
     const container = document.createElement("div")
     container.innerHTML = html
@@ -142,7 +125,7 @@ export function ConverterPage() {
     document.body.removeChild(container)
 
     triggerCopied("rich")
-  }, [buildWechatHtml, themeId, sourceMode, htmlStylePolicy])
+  }, [buildWechatHtml, themeId, sourceMode])
 
   const handleCopyCode = useCallback(async () => {
     const html = buildWechatHtml()
@@ -438,7 +421,7 @@ export function ConverterPage() {
                 sourceMode={sourceMode}
                 placeholder={
                   sourceMode === "html"
-                    ? "在此粘贴带自定义主题的 HTML（可含 <style> 或内联 style）…\n\n默认「保留原文样式」；需要时可改为「套用站点主题」"
+                    ? "在此粘贴带自定义样式的 HTML（可含 <style> 或内联 style）…\n\n将保留原文主题，并做微信兼容处理后可复制发布"
                     : "在此粘贴或输入 Markdown 内容…\n\n点上方工具栏即可插入标题、列表、链接等，无需背语法"
                 }
               />
@@ -469,58 +452,19 @@ export function ConverterPage() {
               >
                 <Eye size={11} />
                 微信预览
-              </div>
-              <div className="flex items-center gap-2 min-w-0">
                 {sourceMode === "html" && (
-                  <div
-                    className="flex items-center rounded-md p-0.5 gap-px shrink-0"
-                    style={{
-                      background: "var(--muted)",
-                      border: "1px solid var(--tool-divider)",
-                    }}
-                    title="HTML 常自带主题：默认保留；也可强制套用本站主题"
-                  >
-                    {(
-                      [
-                        { key: "preserve", label: "保留原文" },
-                        { key: "restyle", label: "站点主题" },
-                      ] as { key: HtmlStylePolicy; label: string }[]
-                    ).map(({ key, label }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => handleHtmlStylePolicyChange(key)}
-                        className="px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap"
-                        style={
-                          htmlStylePolicy === key
-                            ? {
-                                background: "var(--tool-header-bg)",
-                                color: "var(--tool-editor-text)",
-                                boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-                              }
-                            : {
-                                background: "transparent",
-                                color: "var(--tool-label-text)",
-                              }
-                        }
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {(sourceMode === "markdown" ||
-                  htmlStylePolicy === "restyle") && (
-                  <ThemePicker value={themeId} onChange={handleThemeChange} />
+                  <span className="opacity-70 font-normal">· 自定义样式</span>
                 )}
               </div>
+              {sourceMode === "markdown" && (
+                <ThemePicker value={themeId} onChange={handleThemeChange} />
+              )}
             </div>
             <div className="flex-1 overflow-y-auto">
               <WechatPreview
                 source={source}
                 mode={sourceMode}
                 themeId={themeId}
-                htmlStylePolicy={htmlStylePolicy}
               />
             </div>
           </div>
