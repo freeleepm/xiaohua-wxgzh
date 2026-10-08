@@ -439,6 +439,29 @@ const solidifyTextGradients = (map: Map<string, string>, el: Element) => {
   }
 }
 
+/** 空背景声明删掉：公众号会把 transparent 当成一块底 */
+const stripEmptyBackgrounds = (map: Map<string, string>) => {
+  const empty = (v: string) => {
+    const s = v.trim().toLowerCase().replace(/\s+/g, "")
+    return (
+      s === "transparent" ||
+      s === "none" ||
+      s === "initial" ||
+      s === "inherit" ||
+      s === "unset" ||
+      s === "rgba(0,0,0,0)" ||
+      s === "rgb(0,0,0,0)" ||
+      s === "hsla(0,0%,0%,0)" ||
+      s === "#0000" ||
+      s === "#00000000"
+    )
+  }
+  for (const key of ["background", "background-color", "background-image"] as const) {
+    const v = map.get(key)
+    if (v && empty(v)) map.delete(key)
+  }
+}
+
 const normalizeElementStyle = (el: Element) => {
   const tag = el.tagName.toLowerCase()
   const raw = el.getAttribute("style")
@@ -478,6 +501,7 @@ const normalizeElementStyle = (el: Element) => {
   normalizeWhiteSpace(map, tag, el)
   normalizeOpacity(map, tag)
   solidifyTextGradients(map, el)
+  stripEmptyBackgrounds(map)
 
   const pos = map.get("position")?.toLowerCase()
   if (pos === "absolute" || pos === "fixed") {
@@ -598,16 +622,27 @@ export function wechatHtmlToPlainText(html: string): string {
 }
 
 /**
- * 复制到公众号：选区 + execCommand，但必须在空白 iframe 里做。
- * 挂在工具页 body 上复制时，浏览器会把页面底色（--background / 预览灰底）
- * 写进剪贴板，粘到公众号就出现「原文没有的背景」。
+ * 复制到公众号：只写「原文样式字符串」，不让浏览器把计算底色塞进剪贴板。
+ * 禁止给没背景的节点补 transparent——公众号会把它画成一块底。
  */
 export async function copyWechatRichHtml(html: string): Promise<void> {
-  const inner = normalizeWechatArticleHtml(html)
-  const safe =
-    `<section style="font-size:16px;line-height:1.75;text-align:left;letter-spacing:0.034em;background:transparent;background-color:transparent;">` +
-    inner +
-    `</section>`
+  const safe = normalizeWechatArticleHtml(html)
+  const plain = wechatHtmlToPlainText(safe)
+  const fragment =
+    `<html><body><!--StartFragment-->${safe}<!--EndFragment--></body></html>`
+
+  if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+    try {
+      const item = new ClipboardItem({
+        "text/html": new Blob([fragment], { type: "text/html" }),
+        "text/plain": new Blob([plain || " "], { type: "text/plain" }),
+      })
+      await navigator.clipboard.write([item])
+      return
+    } catch {
+      // fall through
+    }
+  }
 
   const iframe = document.createElement("iframe")
   iframe.setAttribute(
@@ -626,21 +661,10 @@ export async function copyWechatRichHtml(html: string): Promise<void> {
   idoc.open()
   idoc.write(
     `<!DOCTYPE html><html><head><meta charset="utf-8"></head>` +
-      `<body style="margin:0;background:transparent;background-color:transparent;" contenteditable="true"></body></html>`,
+      `<body style="margin:0;" contenteditable="true"></body></html>`,
   )
   idoc.close()
   idoc.body.innerHTML = safe
-
-  Array.from(idoc.body.querySelectorAll("*")).forEach((el) => {
-    let st = el.getAttribute("style") || ""
-    st = st.replace(/text-align\s*:\s*start/gi, "text-align:left")
-    st = st.replace(/text-align\s*:\s*end/gi, "text-align:right")
-    // 原文没写背景的节点，锁定透明，避免拷贝时带上计算底色
-    if (!/background(-color|-image)?\s*:/i.test(st)) {
-      st = `${st}${st && !st.endsWith(";") ? ";" : ""}background:transparent;background-color:transparent`
-    }
-    el.setAttribute("style", st)
-  })
 
   iwin.focus()
   idoc.body.focus()
@@ -661,16 +685,6 @@ export async function copyWechatRichHtml(html: string): Promise<void> {
   document.body.removeChild(iframe)
 
   if (ok) return
-
-  const plain = wechatHtmlToPlainText(safe)
-  if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
-    const item = new ClipboardItem({
-      "text/html": new Blob([safe], { type: "text/html" }),
-      "text/plain": new Blob([plain || " "], { type: "text/plain" }),
-    })
-    await navigator.clipboard.write([item])
-    return
-  }
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(safe)
     return
