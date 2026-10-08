@@ -1,13 +1,12 @@
 /**
  * 微信公众号文章结构统一规范化
  *
- * 对照公众号「内容结构检测」常见项：
- * - text-align 仅 left|right|center|justify（禁 start/end 等）
- * - 过大固定 width / 危险水平偏移 → 自适应，避免溢出
- * - line-height 不得过小（多行叠字）
- * - height:0 且含文字 → 去掉
- * - div → section（微信会剥 div 背景）
- * - 去掉 !important、危险定位等
+ * 对齐官方实现 wechatjs/verify-article-structure-spec（layout.detectLineHeightOverlap）：
+ * - Rule A: line-height:0 且含可见文字 → 直接叠字（装饰空条可保留 lh:0，但禁止 ​ 零宽占位）
+ * - Rule B: 多行时 avgLineHeight < fontSize * 0.95 → 叠字
+ * - text-align 仅 left|right|center|justify
+ * - 过大 width / 危险偏移 → 自适应
+ * - div → section；去掉 !important
  *
  * Markdown / HTML 预览与复制前统一走这里。
  */
@@ -84,9 +83,33 @@ const estimateFontPx = (map: Map<string, string>): number => {
   return 16
 }
 
-const hasVisibleText = (el: Element): boolean => {
-  const t = (el.textContent || "").replace(/[\u200b\ufeff\u00a0]/g, "").trim()
-  return t.length > 0
+/** 官方检测也会剥掉的不可见字符（ZWSP 等）。JS trim() 去不掉 ZWSP！ */
+const INVISIBLE_RE = /[\u200b\u200c\u200d\ufeff\u00a0]/g
+
+const visibleText = (raw: string | null | undefined) =>
+  (raw || "").replace(INVISIBLE_RE, "").replace(/\s+/g, " ").trim()
+
+const hasVisibleText = (el: Element): boolean => visibleText(el.textContent).length > 0
+
+/**
+ * 删掉纯不可见文本节点。
+ * 官方 fallback：textContent.trim() 对 ZWSP 仍为 length>0，会把 line-height:0 装饰条判叠字。
+ */
+const stripInvisibleTextNodes = (root: Element) => {
+  const doc = root.ownerDocument
+  if (!doc) return
+  const NF = doc.defaultView?.NodeFilter ?? (globalThis as any).NodeFilter
+  const showText = NF?.SHOW_TEXT ?? 4
+  const walker = doc.createTreeWalker(root, showText)
+  const drop: Text[] = []
+  let n: Node | null = walker.nextNode()
+  while (n) {
+    const raw = n.textContent || ""
+    // 纯 ZWSP / 空占位 → 删除（官方 trim 去不掉 ZWSP，会误判 line-height:0）
+    if (raw.length > 0 && !visibleText(raw)) drop.push(n as Text)
+    n = walker.nextNode()
+  }
+  drop.forEach((t) => t.parentNode?.removeChild(t))
 }
 
 /** 是否可能折行（多行检测用） */
@@ -237,71 +260,82 @@ const normalizeWidth = (map: Map<string, string>, tag: string) => {
   }
 }
 
+/**
+ * 对齐官方 Rule A / Rule B：
+ * - lh===0 + 有字 → 必改
+ * - 有字时保证计算行高 ≥ 0.95 * fontSize（我们统一抬到 1.6，留余量）
+ * - 空节点 + lh:0 + font-size:0：保留（图片缝/装饰条）
+ */
 const normalizeLineHeight = (map: Map<string, string>, el: Element) => {
-  if (isTinyGlyph(map) || isFontSizeZero(map)) return
-  if (isLikelyDecorativeNoText(el)) return
+  const text = hasVisibleText(el)
+
+  // 纯装饰空节点：允许 line-height:0 / font-size:0
+  if (!text) {
+    if (isLikelyDecorativeNoText(el) || isFontSizeZero(map)) return
+    return
+  }
+
+  // 极小装饰点（红黄绿）保留自身字号，但行高不得为 0
+  if (isTinyGlyph(map)) {
+    const lh0 = map.get("line-height")?.trim().toLowerCase()
+    if (lh0 === "0" || lh0 === "0px") map.set("line-height", "1.2")
+    return
+  }
 
   const lh = map.get("line-height")
   const fontPx = estimateFontPx(map)
-  const multi = mayWrap(el)
+  // 官方阈值：avg < fontSize * 0.95 即违规；安全侧用 1.0× 字号
+  const minPx = fontPx * 1.0
 
   if (!lh) {
     const tag = el.tagName.toLowerCase()
-    if (
-      hasVisibleText(el) &&
-      (TEXT_BLOCK_TAGS.has(tag) || tag === "span")
-    ) {
-      // 块级补安全行高；多行 span 也补
-      if (TEXT_BLOCK_TAGS.has(tag) || multi) {
-        map.set("line-height", "1.6")
-      }
+    if (TEXT_BLOCK_TAGS.has(tag) || tag === "span" || tag === "strong" || tag === "em" || tag === "a") {
+      map.set("line-height", "1.6")
     }
     return
   }
 
   const low = lh.trim().toLowerCase()
 
-  if (low === "0" || low === "0px" || low === "0%" || low === "normal") {
-    // normal 在各端不一致；有字时写死
-    if (hasVisibleText(el)) map.set("line-height", "1.6")
+  // Rule A：行高 0 + 有字
+  if (low === "0" || low === "0px" || low === "0%" || low === "0em" || low === "0rem") {
+    map.set("line-height", "1.6")
     return
   }
 
-  // 无单位倍数
+  if (low === "normal") {
+    map.set("line-height", "1.6")
+    return
+  }
+
+  // 无单位倍数：计算行高 = n * fontSize，需 n >= 0.95；统一 >= 1.6
   if (/^[\d.]+$/.test(low)) {
     const n = parseFloat(low)
-    // 多行且 < 1.5 偏紧，统一抬到 1.6；任意有字 < 1.2 必改
-    if (n > 0 && hasVisibleText(el)) {
-      if (n < 1.2 || (multi && n < 1.5)) {
-        map.set("line-height", "1.6")
-      }
-    }
+    if (!Number.isFinite(n) || n < 1.0) map.set("line-height", "1.6")
+    else if (n < 1.5) map.set("line-height", "1.6")
     return
   }
 
   const p = parseLen(low)
-  if (!p) return
-
-  if (p.unit === "px") {
-    // 行高 px < 字号 → 必改；多行时 < 字号 * 1.5 也改
-    if (p.num > 0 && hasVisibleText(el)) {
-      if (p.num < fontPx || (multi && p.num < fontPx * 1.5)) {
-        map.set("line-height", "1.6")
-      }
-    }
+  if (!p) {
+    map.set("line-height", "1.6")
     return
   }
 
-  if (p.unit === "%" && hasVisibleText(el)) {
-    if (p.num < 120 || (multi && p.num < 150)) {
-      map.set("line-height", "1.6")
-    }
+  if (p.unit === "px") {
+    // 官方：平均行高 < 0.95 * 字号
+    if (p.num < minPx) map.set("line-height", "1.6")
+    return
   }
 
-  if ((p.unit === "em" || p.unit === "rem") && hasVisibleText(el)) {
-    if (p.num < 1.2 || (multi && p.num < 1.5)) {
-      map.set("line-height", "1.6")
-    }
+  if (p.unit === "%") {
+    if (p.num < 100) map.set("line-height", "1.6")
+    else if (p.num < 150) map.set("line-height", "1.6")
+    return
+  }
+
+  if (p.unit === "em" || p.unit === "rem") {
+    if (p.num < 1.0 || p.num < 1.5) map.set("line-height", "1.6")
   }
 }
 
@@ -370,6 +404,41 @@ const normalizeOpacity = (map: Map<string, string>, tag: string) => {
   if (!Number.isNaN(n) && n <= 0) map.delete("opacity")
 }
 
+/**
+ * 官方 4.1.2：有文字的节点不要用渐变背景（Dark Mode 难算）
+ * 取渐变中第一个实色作为纯色背景。
+ */
+const solidifyTextGradients = (map: Map<string, string>, el: Element) => {
+  if (!hasVisibleText(el)) return
+
+  const pickSolid = (css: string): string | null => {
+    if (!/gradient/i.test(css)) return null
+    const colors = css.match(
+      /#(?:[0-9a-fA-F]{3,4}){1,2}\b|rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+(?:\s*,\s*[\d.]+)?\s*\)/g,
+    )
+    if (!colors?.length) return null
+    // 跳过全透明
+    for (const c of colors) {
+      if (/rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*0\s*\)/i.test(c)) continue
+      if (/transparent/i.test(c)) continue
+      return c
+    }
+    return colors[0]
+  }
+
+  for (const key of ["background", "background-image"] as const) {
+    const v = map.get(key)
+    if (!v) continue
+    const solid = pickSolid(v)
+    if (!solid) continue
+    map.delete("background-image")
+    map.set("background", solid)
+    map.delete("background-size")
+    map.delete("background-repeat")
+    map.delete("background-position")
+  }
+}
+
 const normalizeElementStyle = (el: Element) => {
   const tag = el.tagName.toLowerCase()
   const raw = el.getAttribute("style")
@@ -408,6 +477,7 @@ const normalizeElementStyle = (el: Element) => {
   normalizeHeight(map, el)
   normalizeWhiteSpace(map, tag, el)
   normalizeOpacity(map, tag)
+  solidifyTextGradients(map, el)
 
   const pos = map.get("position")?.toLowerCase()
   if (pos === "absolute" || pos === "fixed") {
@@ -485,6 +555,8 @@ export function normalizeWechatArticleHtml(html: string): string {
   )
   const body = doc.body
 
+  // 先清 ZWSP，再改结构/样式（顺序对齐官方：有字才测 line-height:0）
+  stripInvisibleTextNodes(body)
   convertDivToSection(body)
 
   Array.from(body.querySelectorAll("*")).forEach((el) => {
@@ -492,6 +564,7 @@ export function normalizeWechatArticleHtml(html: string): string {
   })
 
   flattenDeepSections(body)
+  stripInvisibleTextNodes(body)
 
   Array.from(body.querySelectorAll("*")).forEach((el) => {
     normalizeElementStyle(el)

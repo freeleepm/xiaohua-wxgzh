@@ -164,26 +164,25 @@ export function parseMarkdownToHTML(md: string, themeId: ThemeId = DEFAULT_THEME
   html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
     const highlighted = highlightCode(code.trim(), lang || "plain")
 
-    // float 布局代替 flex，兼容微信（微信会剥离 display:flex）
+    // float 布局代替 flex；装饰圆点不写文字（官方对 line-height:0/偏小+有字会实测叠字）
     const langLabel = lang
-      ? `<span style="float:right;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;` +
-        `font-size:11px;color:#8b8b9e;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;line-height:13px;">${lang}</span>`
-      : `<span style="float:right;font-family:-apple-system,sans-serif;font-size:11px;color:#8b8b9e;line-height:13px;">plaintext</span>`
+      ? `<span style="float:right;font-size:11px;color:#8b8b9e;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;line-height:1.6;">${lang}</span>`
+      : `<span style="float:right;font-size:11px;color:#8b8b9e;line-height:1.6;">plaintext</span>`
 
     const trafficLights =
-      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;margin-right:6px;line-height:12px;font-size:1px;color:#ff5f57;">·</span>` +
-      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#febc2e;margin-right:6px;line-height:12px;font-size:1px;color:#febc2e;">·</span>` +
-      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#28c840;line-height:12px;font-size:1px;color:#28c840;">·</span>`
+      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;margin-right:6px;"></span>` +
+      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#febc2e;margin-right:6px;"></span>` +
+      `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#28c840;"></span>`
 
     // 用 section 代替 div：微信粘贴时会剥除 div 的 background，但保留 section 的 background
     const blockHTML =
-      `<section style="margin:24px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a2e;font-family:'Menlo','Consolas','SFMono-Regular','Courier New',monospace;">` +
-        `<section style="background:#1c1c1e;padding:10px 16px;border-bottom:1px solid #2a2a2e;overflow:hidden;">` +
-          `<span style="float:left;line-height:13px;">${trafficLights}</span>` +
+      `<section style="margin:24px 0;border-radius:10px;overflow:hidden;border:1px solid #2a2a2e;">` +
+        `<section style="background:#1c1c1e;padding:10px 16px;border-bottom:1px solid #2a2a2e;overflow:hidden;line-height:1.6;">` +
+          `<span style="float:left;height:12px;line-height:1.6;">${trafficLights}</span>` +
           langLabel +
         `</section>` +
-        `<section style="background:#1a1a1a;margin:0;padding:20px 22px;overflow-x:auto;">` +
-          `<span style="font-size:13px;line-height:1.8;color:#e2e8f0;white-space:pre-wrap;word-break:break-word;display:block;max-width:100%;box-sizing:border-box;font-family:'Menlo','Consolas','SFMono-Regular','Courier New',monospace;">${highlighted}</span>` +
+        `<section style="background:#1a1a1a;margin:0;padding:20px 22px;overflow-x:auto;line-height:1.8;">` +
+          `<span style="font-size:13px;line-height:1.8;color:#e2e8f0;white-space:pre-wrap;word-break:break-word;display:block;max-width:100%;box-sizing:border-box;font-family:Menlo,Consolas,SFMono-Regular,Courier New,monospace;">${highlighted}</span>` +
         `</section>` +
       `</section>`
 
