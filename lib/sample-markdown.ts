@@ -36,3 +36,26 @@ const html = parseMarkdownToHTML(draft)
 
 写完后切换主题确认版式，再复制到公众号发布即可。
 `
+
+/** HTML 源码示例：粘贴外部 HTML 后同样可转公众号排版 */
+export const SAMPLE_HTML = `<h1>小华同学 AI 公众号排版工具</h1>
+<p><strong>学天科技</strong>旗下公众号工具：把已有 <em>HTML</em> 文稿转为可粘贴进微信图文编辑器的排版。</p>
+<h2>适用场景</h2>
+<ul>
+  <li>从博客、Notion、文档导出的 HTML</li>
+  <li>已有富文本，需要适配微信公众号</li>
+  <li>和 Markdown 模式共用主题与「复制到公众号」</li>
+</ul>
+<blockquote>粘贴完整 HTML 或片段均可；工具会做微信兼容处理并套用当前主题。</blockquote>
+<h3>推荐流程</h3>
+<ol>
+  <li>切换到「HTML」模式</li>
+  <li>粘贴源码，右侧预览效果</li>
+  <li>点击「复制到公众号」发布</li>
+</ol>
+<pre><code>// 也可粘贴带样式的 HTML 片段
+section { /* 微信里更稳 */ }
+</code></pre>
+<hr />
+<p>写完后切换主题确认版式，再复制发布即可。</p>
+`

@@ -19,6 +19,8 @@ interface MarkdownEditorProps {
   onRedo: () => void
   canUndo: boolean
   canRedo: boolean
+  /** markdown：工具栏可用；html：纯源码编辑 */
+  sourceMode?: "markdown" | "html"
   placeholder?: string
   className?: string
 }
@@ -30,9 +32,11 @@ export function MarkdownEditor({
   onRedo,
   canUndo,
   canRedo,
+  sourceMode = "markdown",
   placeholder,
   className,
 }: MarkdownEditorProps) {
+  const isHtml = sourceMode === "html"
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [dialogKind, setDialogKind] = useState<InsertDialogKind | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -134,6 +138,8 @@ export function MarkdownEditor({
       return
     }
 
+    if (isHtml) return
+
     const shortcut: Record<string, MdAction | undefined> = {
       b: { type: "wrap", before: "**", after: "**", empty: "加粗文字" },
       i: { type: "wrap", before: "*", after: "*", empty: "斜体文字" },
@@ -154,20 +160,35 @@ export function MarkdownEditor({
 
   return (
     <div className={cn("flex flex-col h-full min-h-0", className)}>
-      <MarkdownToolbar
-        onAction={(action) => {
-          captureSelection()
-          runAction(action)
-        }}
-        onOpenDialog={(kind) => {
-          captureSelection()
-          openDialog(kind)
-        }}
-        onUndo={onUndo}
-        onRedo={onRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-      />
+      {!isHtml && (
+        <MarkdownToolbar
+          onAction={(action) => {
+            captureSelection()
+            runAction(action)
+          }}
+          onOpenDialog={(kind) => {
+            captureSelection()
+            openDialog(kind)
+          }}
+          onUndo={onUndo}
+          onRedo={onRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
+      )}
+      {isHtml && (
+        <div
+          className="flex items-center gap-2 px-4 shrink-0 text-[11px]"
+          style={{
+            height: 36,
+            borderBottom: "1px solid var(--tool-divider)",
+            color: "var(--tool-label-text)",
+            background: "var(--tool-panel-header)",
+          }}
+        >
+          粘贴 HTML 源码或片段，右侧预览并「复制到公众号」即可发布
+        </div>
+      )}
       <div className="flex-1 min-h-0 relative">
         <textarea
           ref={textareaRef}
@@ -177,12 +198,12 @@ export function MarkdownEditor({
           onSelect={captureSelection}
           onKeyUp={captureSelection}
           onContextMenu={(e) => {
+            if (isHtml) return
             e.preventDefault()
             captureSelection()
             setMenu({ open: true, x: e.clientX, y: e.clientY })
           }}
           onMouseDown={() => {
-            // 左键选区 / 点击：关掉右键菜单，绝不在选字时弹出
             if (menu.open) closeMenu()
           }}
           placeholder={placeholder}
@@ -198,28 +219,32 @@ export function MarkdownEditor({
           }}
         />
       </div>
-      <MarkdownContextMenu
-        open={menu.open}
-        x={menu.x}
-        y={menu.y}
-        onClose={closeMenu}
-        onAction={runAction}
-        onOpenDialog={openDialog}
-        onUndo={onUndo}
-        onRedo={onRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-      />
-      <MdInsertDialog
-        kind={dialogKind}
-        open={dialogOpen}
-        selectedText={selectedText}
-        onOpenChange={(open) => {
-          setDialogOpen(open)
-          if (!open) setDialogKind(null)
-        }}
-        onInsert={handleInsertSnippet}
-      />
+      {!isHtml && (
+        <>
+          <MarkdownContextMenu
+            open={menu.open}
+            x={menu.x}
+            y={menu.y}
+            onClose={closeMenu}
+            onAction={runAction}
+            onOpenDialog={openDialog}
+            onUndo={onUndo}
+            onRedo={onRedo}
+            canUndo={canUndo}
+            canRedo={canRedo}
+          />
+          <MdInsertDialog
+            kind={dialogKind}
+            open={dialogOpen}
+            selectedText={selectedText}
+            onOpenChange={(open) => {
+              setDialogOpen(open)
+              if (!open) setDialogKind(null)
+            }}
+            onInsert={handleInsertSnippet}
+          />
+        </>
+      )}
     </div>
   )
 }

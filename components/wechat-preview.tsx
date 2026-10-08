@@ -1,19 +1,27 @@
 "use client"
 
 import { useMemo } from "react"
-import { parseMarkdownToHTML } from "@/lib/markdown-parser"
+import { renderSourceToWechat, type SourceMode } from "@/lib/content-render"
 import { DEFAULT_THEME_ID, getTheme, type ThemeId } from "@/lib/wechat-themes"
 
 interface WechatPreviewProps {
-  markdown: string
+  source: string
+  mode?: SourceMode
   themeId?: ThemeId
 }
 
-export function WechatPreview({ markdown, themeId = DEFAULT_THEME_ID }: WechatPreviewProps) {
+export function WechatPreview({
+  source,
+  mode = "markdown",
+  themeId = DEFAULT_THEME_ID,
+}: WechatPreviewProps) {
   const theme = getTheme(themeId)
-  const html = useMemo(() => parseMarkdownToHTML(markdown, themeId), [markdown, themeId])
+  const html = useMemo(
+    () => renderSourceToWechat(source, mode, themeId),
+    [source, mode, themeId],
+  )
 
-  if (!markdown.trim()) {
+  if (!source.trim()) {
     return (
       <div
         className="flex flex-col items-center justify-center h-full gap-4 text-center px-10"
@@ -45,13 +53,15 @@ export function WechatPreview({ markdown, themeId = DEFAULT_THEME_ID }: WechatPr
             className="text-sm font-semibold mb-1.5"
             style={{ color: "var(--tool-editor-text)" }}
           >
-            在左侧粘贴 Markdown 内容
+            {mode === "html"
+              ? "在左侧粘贴 HTML 源码"
+              : "在左侧粘贴 Markdown 内容"}
           </p>
           <p
             className="text-xs leading-relaxed"
             style={{ color: "var(--tool-label-text)" }}
           >
-            右侧将实时预览微信公众号排版效果
+            右侧将实时预览微信公众号排版效果，可一键复制发布
           </p>
         </div>
       </div>

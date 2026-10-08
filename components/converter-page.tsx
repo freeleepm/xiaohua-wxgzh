@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { MarkdownEditor } from "@/components/markdown-editor"
 import { WechatPreview } from "@/components/wechat-preview"
 import { ThemePicker } from "@/components/theme-picker"
-import { parseMarkdownToHTML } from "@/lib/markdown-parser"
-import { SAMPLE_MARKDOWN } from "@/lib/sample-markdown"
+import { renderSourceToWechat, isSourceMode, SOURCE_MODE_KEY, type SourceMode } from "@/lib/content-render"
+import { SAMPLE_HTML, SAMPLE_MARKDOWN } from "@/lib/sample-markdown"
 import { loadCurrentDraft } from "@/lib/draft-versions"
 import { useTextHistory } from "@/hooks/use-text-history"
 import { useDraftVersions } from "@/hooks/use-draft-versions"
@@ -31,36 +31,40 @@ import {
   Columns2,
   Zap,
   ClipboardCopy,
+  Code2,
 } from "lucide-react"
 
 type ViewMode = "split" | "editor" | "preview"
 
 export function ConverterPage() {
   const {
-    value: markdown,
-    set: setMarkdown,
+    value: source,
+    set: setSource,
     undo,
     redo,
     canUndo,
     canRedo,
   } = useTextHistory(SAMPLE_MARKDOWN)
-  const { versions, saveHint, saveNow, remove: removeVersion } = useDraftVersions(markdown)
+  const { versions, saveHint, saveNow, remove: removeVersion } = useDraftVersions(source)
   const restoredRef = useRef(false)
   const [view, setView] = useState<ViewMode>("split")
   const [copied, setCopied] = useState<"idle" | "rich" | "code">("idle")
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME_ID)
+  const [sourceMode, setSourceMode] = useState<SourceMode>("markdown")
 
   useEffect(() => {
     const saved = window.localStorage.getItem("md2wx-wechat-theme")
     if (saved && isThemeId(saved)) setThemeId(saved)
+    const mode = window.localStorage.getItem(SOURCE_MODE_KEY)
+    if (mode && isSourceMode(mode)) setSourceMode(mode)
   }, [])
 
   useEffect(() => {
     if (restoredRef.current) return
     restoredRef.current = true
     const current = loadCurrentDraft()
-    if (current != null && current !== "") setMarkdown(current, "push")
-  }, [setMarkdown])
+    if (current != null && current !== "") setSource(current, "push")
+  }, [setSource])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -78,22 +82,25 @@ export function ConverterPage() {
     window.localStorage.setItem("md2wx-wechat-theme", id)
   }, [])
 
+  const handleSourceModeChange = useCallback((mode: SourceMode) => {
+    setSourceMode(mode)
+    window.localStorage.setItem(SOURCE_MODE_KEY, mode)
+  }, [])
+
   const triggerCopied = (type: "rich" | "code") => {
     setCopied(type)
     setTimeout(() => setCopied("idle"), 2500)
   }
 
-  // Copy as rich text — renders HTML into a hidden element and uses
-  // Selection + execCommand('copy') to produce a rich-text clipboard entry.
-  // This is the most reliable way to paste into WeChat editor with full styles,
-  // because the browser serialises the *rendered* DOM (with computed styles)
-  // rather than raw HTML that WeChat's sanitiser would strip.
+  const buildWechatHtml = useCallback(
+    () => renderSourceToWechat(source, sourceMode, themeId),
+    [source, sourceMode, themeId],
+  )
+
   const handleCopyRich = useCallback(async () => {
-    const html = parseMarkdownToHTML(markdown, themeId)
+    const html = buildWechatHtml()
     const theme = getTheme(themeId)
 
-    // Create an off-screen container with the rendered HTML
-    // width:2000px 防止 white-space:pre 的代码块因容器太窄被强制换行
     const container = document.createElement("div")
     container.innerHTML = html
     container.className = "wechat-preview-container"
@@ -102,7 +109,6 @@ export function ConverterPage() {
       `font-family:${theme.font};`
     document.body.appendChild(container)
 
-    // Select the rendered content
     const range = document.createRange()
     range.selectNodeContents(container)
     const selection = window.getSelection()
@@ -111,31 +117,27 @@ export function ConverterPage() {
       selection.addRange(range)
     }
 
-    // Copy via execCommand — produces rich text that WeChat respects
     document.execCommand("copy")
 
-    // Clean up
     if (selection) selection.removeAllRanges()
     document.body.removeChild(container)
 
     triggerCopied("rich")
-  }, [markdown, themeId])
+  }, [buildWechatHtml, themeId])
 
-  // Copy raw HTML code for advanced users
   const handleCopyCode = useCallback(async () => {
-    const html = parseMarkdownToHTML(markdown, themeId)
+    const html = buildWechatHtml()
     await navigator.clipboard.writeText(html)
     triggerCopied("code")
-  }, [markdown, themeId])
+  }, [buildWechatHtml])
 
-  const handleClear = useCallback(() => setMarkdown("", "push"), [setMarkdown])
-  const handleLoadSample = useCallback(
-    () => setMarkdown(SAMPLE_MARKDOWN, "push"),
-    [setMarkdown],
-  )
+  const handleClear = useCallback(() => setSource("", "push"), [setSource])
+  const handleLoadSample = useCallback(() => {
+    setSource(sourceMode === "html" ? SAMPLE_HTML : SAMPLE_MARKDOWN, "push")
+  }, [setSource, sourceMode])
 
-  const charCount = markdown.length
-  const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0
+  const charCount = source.length
+  const wordCount = source.trim() ? source.trim().split(/\s+/).length : 0
 
   return (
     <div
@@ -308,7 +310,7 @@ export function ConverterPage() {
         <VersionPicker
           versions={versions}
           onSave={saveNow}
-          onRestore={(v) => setMarkdown(v.content, "push")}
+          onRestore={(v) => setSource(v.content, "push")}
           onRemove={removeVersion}
         />
         <span
@@ -355,17 +357,70 @@ export function ConverterPage() {
               background: "var(--tool-editor-bg)",
             }}
           >
-            <PanelLabel icon={<FileText size={11} />} text="Markdown 编辑" />
+            <div
+              className="flex items-center justify-between gap-2 px-5 shrink-0"
+              style={{
+                height: 38,
+                borderBottom: "1px solid var(--tool-divider)",
+                background: "var(--tool-panel-header)",
+              }}
+            >
+              <div
+                className="flex items-center gap-1.5 text-xs font-medium"
+                style={{ color: "var(--tool-label-text)" }}
+              >
+                {sourceMode === "html" ? <Code2 size={11} /> : <FileText size={11} />}
+                {sourceMode === "html" ? "HTML 源码" : "Markdown 编辑"}
+              </div>
+              <div
+                className="flex items-center rounded-md p-0.5 gap-px"
+                style={{
+                  background: "var(--muted)",
+                  border: "1px solid var(--tool-divider)",
+                }}
+              >
+                {(
+                  [
+                    { key: "markdown", label: "Markdown" },
+                    { key: "html", label: "HTML" },
+                  ] as { key: SourceMode; label: string }[]
+                ).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleSourceModeChange(key)}
+                    className="px-2.5 py-1 rounded text-[11px] font-medium transition-all"
+                    style={
+                      sourceMode === key
+                        ? {
+                            background: "var(--tool-header-bg)",
+                            color: "var(--tool-editor-text)",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                          }
+                        : {
+                            background: "transparent",
+                            color: "var(--tool-label-text)",
+                          }
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex-1 overflow-hidden">
               <MarkdownEditor
-                value={markdown}
-                onChange={setMarkdown}
+                value={source}
+                onChange={setSource}
                 onUndo={undo}
                 onRedo={redo}
                 canUndo={canUndo}
                 canRedo={canRedo}
+                sourceMode={sourceMode}
                 placeholder={
-                  "在此粘贴或输入 Markdown 内容…\n\n点上方工具栏即可插入标题、列表、链接等，无需背语法"
+                  sourceMode === "html"
+                    ? "在此粘贴 HTML 源码或片段…\n\n支持完整页面或 <p>/<h1> 等片段，右侧预览后可「复制到公众号」"
+                    : "在此粘贴或输入 Markdown 内容…\n\n点上方工具栏即可插入标题、列表、链接等，无需背语法"
                 }
               />
             </div>
@@ -399,34 +454,11 @@ export function ConverterPage() {
               <ThemePicker value={themeId} onChange={handleThemeChange} />
             </div>
             <div className="flex-1 overflow-y-auto">
-              <WechatPreview markdown={markdown} themeId={themeId} />
+              <WechatPreview source={source} mode={sourceMode} themeId={themeId} />
             </div>
           </div>
         )}
       </main>
-    </div>
-  )
-}
-
-function PanelLabel({
-  icon,
-  text,
-}: {
-  icon: React.ReactNode
-  text: string
-}) {
-  return (
-    <div
-      className="flex items-center gap-1.5 px-5 text-xs font-medium shrink-0"
-      style={{
-        height: 38,
-        borderBottom: "1px solid var(--tool-divider)",
-        color: "var(--tool-label-text)",
-        background: "var(--tool-panel-header)",
-      }}
-    >
-      {icon}
-      {text}
     </div>
   )
 }
