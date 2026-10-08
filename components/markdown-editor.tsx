@@ -186,7 +186,7 @@ export function MarkdownEditor({
             background: "var(--tool-panel-header)",
           }}
         >
-          粘贴 HTML 源码或片段，右侧预览并「复制到公众号」即可发布
+          默认「保留原文」：内联自定义 CSS 主题并做微信兼容；需要统一换肤时再选「站点主题」
         </div>
       )}
       <div className="flex-1 min-h-0 relative">
