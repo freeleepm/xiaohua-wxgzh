@@ -5,6 +5,7 @@ import { MarkdownEditor } from "@/components/markdown-editor"
 import { WechatPreview } from "@/components/wechat-preview"
 import { ThemePicker } from "@/components/theme-picker"
 import { renderSourceToWechat, isSourceMode, SOURCE_MODE_KEY, type SourceMode } from "@/lib/content-render"
+import { copyWechatRichHtml } from "@/lib/wechat-article-normalize"
 import { SAMPLE_HTML, SAMPLE_MARKDOWN } from "@/lib/sample-markdown"
 import { loadCurrentDraft } from "@/lib/draft-versions"
 import { useTextHistory } from "@/hooks/use-text-history"
@@ -12,7 +13,6 @@ import { useDraftVersions } from "@/hooks/use-draft-versions"
 import { VersionPicker } from "@/components/version-picker"
 import {
   DEFAULT_THEME_ID,
-  getTheme,
   isThemeId,
   type ThemeId,
 } from "@/lib/wechat-themes"
@@ -98,36 +98,13 @@ export function ConverterPage() {
   )
 
   const handleCopyRich = useCallback(async () => {
-    const html = buildWechatHtml()
-    const theme = getTheme(themeId)
-    // HTML 保留自定义样式，不强制站点字体
-    const font = sourceMode === "html" ? "inherit" : theme.font
-
-    const container = document.createElement("div")
-    container.innerHTML = html
-    container.className = "wechat-preview-container"
-    container.style.cssText =
-      "position:fixed;left:-9999px;top:-9999px;opacity:0;width:2000px;" +
-      `font-family:${font};`
-    document.body.appendChild(container)
-
-    const range = document.createRange()
-    range.selectNodeContents(container)
-    const selection = window.getSelection()
-    if (selection) {
-      selection.removeAllRanges()
-      selection.addRange(range)
-    }
-
-    document.execCommand("copy")
-
-    if (selection) selection.removeAllRanges()
-    document.body.removeChild(container)
-
+    // 统一规范化后再写入剪贴板，避免 execCommand 回写 text-align:start 等
+    await copyWechatRichHtml(buildWechatHtml())
     triggerCopied("rich")
-  }, [buildWechatHtml, themeId, sourceMode])
+  }, [buildWechatHtml])
 
   const handleCopyCode = useCallback(async () => {
+    // buildWechatHtml 已含 normalize；源码复制同样走统一结果
     const html = buildWechatHtml()
     await navigator.clipboard.writeText(html)
     triggerCopied("code")

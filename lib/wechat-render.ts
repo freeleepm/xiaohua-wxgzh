@@ -181,20 +181,20 @@ const h3 = {
     `</section>`,
 
   italic: (text: string, theme: WechatTheme) =>
-    `<div style="margin:20px 0 10px;text-align:center;">` +
+    `<section style="margin:20px 0 10px;text-align:center;">` +
     `<span style="font-size:15px;font-weight:600;font-style:italic;color:${theme.h3.color};` +
-    `letter-spacing:0.08em;${headingFamily(theme)}">${text}</span></div>`,
+    `letter-spacing:0.08em;line-height:1.6;${headingFamily(theme)}">${text}</span></section>`,
 
   plain: (text: string, theme: WechatTheme) =>
-    `<div style="margin:20px 0 10px;">` +
+    `<section style="margin:20px 0 10px;text-align:left;">` +
     `<span style="font-size:16px;font-weight:700;color:${theme.h3.color};display:block;` +
-    `letter-spacing:0.04em;${headingFamily(theme)}">${text}</span></div>`,
+    `letter-spacing:0.04em;line-height:1.6;${headingFamily(theme)}">${text}</span></section>`,
 
   hash: (text: string, theme: WechatTheme) =>
-    `<div style="margin:20px 0 10px;">` +
+    `<section style="margin:20px 0 10px;text-align:left;">` +
     `<span style="color:${theme.h3.color};opacity:0.45;margin-right:6px;font-weight:700;">#</span>` +
-    `<span style="font-size:15px;font-weight:600;color:${theme.h3.color};${headingFamily(theme)}">${text}</span>` +
-    `</div>`,
+    `<span style="font-size:15px;font-weight:600;color:${theme.h3.color};line-height:1.6;${headingFamily(theme)}">${text}</span>` +
+    `</section>`,
 }
 
 export const renderH1 = (text: string, theme: WechatTheme) => h1[theme.h1.kind](text, theme)
@@ -202,19 +202,19 @@ export const renderH2 = (text: string, theme: WechatTheme) => h2[theme.h2.kind](
 export const renderH3 = (text: string, theme: WechatTheme) => h3[theme.h3.kind](text, theme)
 
 export const renderH4 = (text: string, theme: WechatTheme) =>
-  `<div style="margin:22px 0 8px;">` +
+  `<section style="margin:22px 0 8px;text-align:left;">` +
   `<span style="font-size:15px;font-weight:700;color:${theme.h4};display:block;` +
-  `${headingFamily(theme)}">${text}</span></div>`
+  `line-height:1.6;${headingFamily(theme)}">${text}</span></section>`
 
 export const renderH5 = (text: string, theme: WechatTheme) =>
-  `<div style="margin:18px 0 7px;">` +
+  `<section style="margin:18px 0 7px;text-align:left;">` +
   `<span style="font-size:13px;font-weight:600;color:${theme.h5};display:block;` +
-  `${headingFamily(theme)}">${text}</span></div>`
+  `line-height:1.6;${headingFamily(theme)}">${text}</span></section>`
 
 export const renderH6 = (text: string, theme: WechatTheme) =>
-  `<div style="margin:16px 0 6px;">` +
+  `<section style="margin:16px 0 6px;text-align:left;">` +
   `<span style="font-size:11px;font-weight:700;color:${theme.h6};letter-spacing:0.14em;` +
-  `text-transform:uppercase;display:block;${headingFamily(theme)}">${text}</span></div>`
+  `text-transform:uppercase;display:block;line-height:1.6;${headingFamily(theme)}">${text}</span></section>`
 
 // ── 段落 / 行内 ──────────────────────────────────────────────────
 
@@ -272,9 +272,9 @@ const hr = {
 export const renderHr = (theme: WechatTheme) => hr[theme.hr.kind](theme)
 
 export const renderImage = (alt: string, src: string) =>
-  `<div style="margin:18px 0;text-align:center;">` +
-  `<img src="${src}" alt="${alt}" style="max-width:100%;border-radius:8px;display:inline-block;" />` +
-  `</div>`
+  `<section style="margin:18px 0;text-align:center;">` +
+  `<img src="${src}" alt="${alt}" style="max-width:100%;height:auto;border-radius:8px;display:inline-block;box-sizing:border-box;" />` +
+  `</section>`
 
 // ── 引用 ──────────────────────────────────────────────────────────
 

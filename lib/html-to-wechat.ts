@@ -258,7 +258,7 @@ export function parseHtmlToWechat(source: string): string {
       const t = (node.textContent || "").trim()
       if (t)
         out.push(
-          `<p style="margin:0 0 12px;line-height:1.75;font-size:15px;">${t}</p>`,
+          `<p style="margin:0 0 12px;line-height:1.75;font-size:15px;text-align:left;">${t}</p>`,
         )
       return
     }

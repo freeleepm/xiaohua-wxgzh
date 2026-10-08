@@ -183,7 +183,7 @@ export function parseMarkdownToHTML(md: string, themeId: ThemeId = DEFAULT_THEME
           langLabel +
         `</section>` +
         `<section style="background:#1a1a1a;margin:0;padding:20px 22px;overflow-x:auto;">` +
-          `<span style="font-size:13px;line-height:1.8;color:#e2e8f0;white-space:pre;display:block;font-family:'Menlo','Consolas','SFMono-Regular','Courier New',monospace;">${highlighted}</span>` +
+          `<span style="font-size:13px;line-height:1.8;color:#e2e8f0;white-space:pre-wrap;word-break:break-word;display:block;max-width:100%;box-sizing:border-box;font-family:'Menlo','Consolas','SFMono-Regular','Courier New',monospace;">${highlighted}</span>` +
         `</section>` +
       `</section>`
 
