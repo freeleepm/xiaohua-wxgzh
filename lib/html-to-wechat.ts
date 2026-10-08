@@ -151,10 +151,21 @@ const inlineDocumentStyles = (doc: Document, root: Element) => {
   doc.querySelectorAll("style").forEach((node) => {
     chunks.push(node.textContent || "")
   })
+  // 不把 body 上的整页背景/字体铺到正文根节点
   const bodyStyle = doc.body?.getAttribute("style")
-  if (bodyStyle) mergeDecls(root, bodyStyle, "prefer-extra")
+  if (bodyStyle) {
+    const map = parseDecls(sanitizeCss(bodyStyle))
+    ;["background", "background-color", "background-image", "background-size"].forEach(
+      (k) => map.delete(k),
+    )
+    const rest = declsToString(map)
+    if (rest) mergeDecls(root, rest, "prefer-extra")
+  }
 
   for (const rule of parseCssRules(chunks.join("\n"))) {
+    const sel = rule.selector.trim()
+    // 整页底色不要打进正文（html/body/:root）
+    if (/^(html|body|:root)$/i.test(sel)) continue
     let nodes: NodeListOf<Element>
     try {
       nodes = root.querySelectorAll(rule.selector)

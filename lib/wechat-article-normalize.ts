@@ -598,50 +598,67 @@ export function wechatHtmlToPlainText(html: string): string {
 }
 
 /**
- * 复制到公众号：必须走「选区 + execCommand」。
- * Clipboard API 的 text/html 进公众号编辑器会被二次排版，行高实测容易误报。
- * 隐藏容器宽度用 677（官方正文区），禁止 1px，否则复制时按窄屏折行污染计算样式。
+ * 复制到公众号：选区 + execCommand，但必须在空白 iframe 里做。
+ * 挂在工具页 body 上复制时，浏览器会把页面底色（--background / 预览灰底）
+ * 写进剪贴板，粘到公众号就出现「原文没有的背景」。
  */
 export async function copyWechatRichHtml(html: string): Promise<void> {
   const inner = normalizeWechatArticleHtml(html)
   const safe =
-    `<section style="font-size:16px;line-height:1.75;text-align:left;letter-spacing:0.034em;">` +
+    `<section style="font-size:16px;line-height:1.75;text-align:left;letter-spacing:0.034em;background:transparent;background-color:transparent;">` +
     inner +
     `</section>`
 
-  const holder = document.createElement("section")
-  holder.setAttribute("contenteditable", "true")
-  holder.setAttribute(
+  const iframe = document.createElement("iframe")
+  iframe.setAttribute(
     "style",
-    "position:fixed;left:0;top:0;width:677px;opacity:0;pointer-events:none;z-index:-1",
+    "position:fixed;left:-9999px;top:0;width:677px;height:240px;border:0;opacity:0;pointer-events:none",
   )
-  holder.innerHTML = safe
+  document.body.appendChild(iframe)
 
-  Array.from(holder.querySelectorAll("*")).forEach((el) => {
+  const idoc = iframe.contentDocument
+  const iwin = iframe.contentWindow
+  if (!idoc || !iwin) {
+    document.body.removeChild(iframe)
+    throw new Error("copy failed")
+  }
+
+  idoc.open()
+  idoc.write(
+    `<!DOCTYPE html><html><head><meta charset="utf-8"></head>` +
+      `<body style="margin:0;background:transparent;background-color:transparent;" contenteditable="true"></body></html>`,
+  )
+  idoc.close()
+  idoc.body.innerHTML = safe
+
+  Array.from(idoc.body.querySelectorAll("*")).forEach((el) => {
     let st = el.getAttribute("style") || ""
     st = st.replace(/text-align\s*:\s*start/gi, "text-align:left")
     st = st.replace(/text-align\s*:\s*end/gi, "text-align:right")
+    // 原文没写背景的节点，锁定透明，避免拷贝时带上计算底色
+    if (!/background(-color|-image)?\s*:/i.test(st)) {
+      st = `${st}${st && !st.endsWith(";") ? ";" : ""}background:transparent;background-color:transparent`
+    }
     el.setAttribute("style", st)
   })
 
-  document.body.appendChild(holder)
-  holder.focus()
-
-  const selection = window.getSelection()
-  const range = document.createRange()
-  range.selectNodeContents(holder)
-  selection?.removeAllRanges()
-  selection?.addRange(range)
+  iwin.focus()
+  idoc.body.focus()
+  const sel = iwin.getSelection()
+  const range = idoc.createRange()
+  range.selectNodeContents(idoc.body)
+  sel?.removeAllRanges()
+  sel?.addRange(range)
 
   let ok = false
   try {
-    ok = document.execCommand("copy")
+    ok = idoc.execCommand("copy")
   } catch {
     ok = false
   }
 
-  selection?.removeAllRanges()
-  document.body.removeChild(holder)
+  sel?.removeAllRanges()
+  document.body.removeChild(iframe)
 
   if (ok) return
 
