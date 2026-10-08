@@ -107,49 +107,9 @@ function classesToInlineStyles(html: string): string {
   )
 }
 
-function highlightCode(code: string, lang: string): string {
-  const l = lang.toLowerCase()
-
-  // 尝试用 highlight.js 进行语法高亮
-  try {
-    // 语言别名映射
-    const langAlias: Record<string, string> = {
-      js: "javascript",
-      ts: "typescript",
-      py: "python",
-      sh: "bash",
-      shell: "bash",
-      yml: "yaml",
-    }
-    const normalizedLang = langAlias[l] || l
-
-    let highlighted: string
-    if (normalizedLang && normalizedLang !== "plain" && normalizedLang !== "text") {
-      try {
-        const result = hljs.highlight(code, { language: normalizedLang, ignoreIllegals: true })
-        highlighted = result.value
-      } catch {
-        // 语言不支持时自动检测
-        const result = hljs.highlightAuto(code)
-        highlighted = result.value
-      }
-    } else {
-      // plain/text：只做 HTML 转义
-      highlighted = code
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-    }
-
-    // 将 class 属性转换为内联 style（微信兼容）
-    return classesToInlineStyles(highlighted)
-  } catch {
-    // 兜底：纯 HTML 转义
-    return code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-  }
+function highlightCode(code: string, _lang: string): string {
+  // 不拆 token span：公众号旧版用 getClientRects 数量当行数，色 span 会误报叠字
+  return code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 

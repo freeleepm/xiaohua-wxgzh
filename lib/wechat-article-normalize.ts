@@ -598,62 +598,65 @@ export function wechatHtmlToPlainText(html: string): string {
 }
 
 /**
- * 复制到公众号：优先写规范化 HTML 字符串，避免 execCommand 把
- * text-align:start 等计算样式写回剪贴板。
+ * 复制到公众号：必须走「选区 + execCommand」。
+ * Clipboard API 的 text/html 进公众号编辑器会被二次排版，行高实测容易误报。
+ * 隐藏容器宽度用 677（官方正文区），禁止 1px，否则复制时按窄屏折行污染计算样式。
  */
 export async function copyWechatRichHtml(html: string): Promise<void> {
-  const safe = normalizeWechatArticleHtml(html)
-  const plain = wechatHtmlToPlainText(safe)
+  const inner = normalizeWechatArticleHtml(html)
+  const safe =
+    `<section style="font-size:16px;line-height:1.75;text-align:left;letter-spacing:0.034em;">` +
+    inner +
+    `</section>`
 
-  // 1) Clipboard API：内容完全可控
-  if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
-    try {
-      const item = new ClipboardItem({
-        "text/html": new Blob([safe], { type: "text/html" }),
-        "text/plain": new Blob([plain || " "], { type: "text/plain" }),
-      })
-      await navigator.clipboard.write([item])
-      return
-    } catch {
-      // fall through
-    }
-  }
-
-  // 2) execCommand 兜底：插入前已规范化，容器不设会污染的继承样式
-  const container = document.createElement("div")
-  container.setAttribute(
+  const holder = document.createElement("section")
+  holder.setAttribute("contenteditable", "true")
+  holder.setAttribute(
     "style",
-    "position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;overflow:hidden",
+    "position:fixed;left:0;top:0;width:677px;opacity:0;pointer-events:none;z-index:-1",
   )
-  container.innerHTML = safe
-  // 再扫一遍子节点，防止序列化前被改
-  Array.from(container.querySelectorAll("*")).forEach((el) => {
-    const st = el.getAttribute("style") || ""
-    if (/text-align\s*:\s*start/i.test(st)) {
-      el.setAttribute("style", st.replace(/text-align\s*:\s*start/gi, "text-align:left"))
-    }
-    if (/text-align\s*:\s*end/i.test(st)) {
-      el.setAttribute("style", st.replace(/text-align\s*:\s*end/gi, "text-align:right"))
-    }
+  holder.innerHTML = safe
+
+  Array.from(holder.querySelectorAll("*")).forEach((el) => {
+    let st = el.getAttribute("style") || ""
+    st = st.replace(/text-align\s*:\s*start/gi, "text-align:left")
+    st = st.replace(/text-align\s*:\s*end/gi, "text-align:right")
+    el.setAttribute("style", st)
   })
-  document.body.appendChild(container)
+
+  document.body.appendChild(holder)
+  holder.focus()
 
   const selection = window.getSelection()
   const range = document.createRange()
-  range.selectNodeContents(container)
+  range.selectNodeContents(holder)
   selection?.removeAllRanges()
   selection?.addRange(range)
 
-  const ok = document.execCommand("copy")
-  selection?.removeAllRanges()
-  document.body.removeChild(container)
-
-  if (!ok) {
-    // 最后：至少复制 HTML 源码
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(safe)
-      return
-    }
-    throw new Error("copy failed")
+  let ok = false
+  try {
+    ok = document.execCommand("copy")
+  } catch {
+    ok = false
   }
+
+  selection?.removeAllRanges()
+  document.body.removeChild(holder)
+
+  if (ok) return
+
+  const plain = wechatHtmlToPlainText(safe)
+  if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+    const item = new ClipboardItem({
+      "text/html": new Blob([safe], { type: "text/html" }),
+      "text/plain": new Blob([plain || " "], { type: "text/plain" }),
+    })
+    await navigator.clipboard.write([item])
+    return
+  }
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(safe)
+    return
+  }
+  throw new Error("copy failed")
 }

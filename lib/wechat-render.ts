@@ -227,10 +227,10 @@ export const renderParagraph = (text: string, theme: WechatTheme) => {
 }
 
 export const renderStrong = (text: string, theme: WechatTheme) =>
-  `<strong style="font-weight:700;color:${theme.bold};">${text}</strong>`
+  `<strong style="font-weight:700;color:${theme.bold};font-size:inherit;line-height:inherit;">${text}</strong>`
 
 export const renderEm = (text: string, theme: WechatTheme) =>
-  `<em style="font-style:italic;color:${theme.italic};">${text}</em>`
+  `<em style="font-style:italic;color:${theme.italic};font-size:inherit;line-height:inherit;">${text}</em>`
 
 export const renderStrike = (text: string, theme: WechatTheme) =>
   `<del style="color:${theme.strike};text-decoration:line-through;">${text}</del>`
@@ -321,43 +321,26 @@ const LIST_MARK: Record<WechatTheme["list"]["kind"], string> = {
 }
 
 export const renderUlItem = (text: string, theme: WechatTheme) =>
-  `<section style="margin:7px 0;line-height:1.75;text-align:left;">` +
-  `<span style="color:${theme.bullet};font-size:${theme.list.kind === "dot" ? "8px" : "12px"};` +
-  `margin-right:8px;vertical-align:middle;line-height:1.75;">${LIST_MARK[theme.list.kind]}</span>` +
-  `<span style="color:${theme.text};line-height:1.75;">${text}</span></section>`
+  `<section style="margin:7px 0;line-height:1.75;font-size:${theme.body.size};color:${theme.text};text-align:left;">` +
+  `${LIST_MARK[theme.list.kind]} ${text}</section>`
 
-export const wrapList = (items: string) =>
-  `<section style="margin:14px 0;padding-left:4px;text-align:left;line-height:1.75;">${items}</section>`
+/** 不再包一层总列表：公众号按顶层段实测，整包列表会被算成多行叠字 */
+export const wrapList = (items: string) => items
 
 const olItem = {
   badge: (text: string, n: number, theme: WechatTheme) =>
-    `<section style="margin:7px 0;line-height:1.75;overflow:hidden;text-align:left;">` +
-    `<span style="display:block;float:left;min-width:22px;height:22px;background:${theme.ol.bg};color:${theme.ol.color};` +
-    `border-radius:50%;text-align:center;font-size:12px;font-weight:700;line-height:22px;` +
-    `margin-right:10px;">${n}</span>` +
-    `<span style="display:block;overflow:hidden;color:${theme.text};line-height:1.75;">${text}</span></section>`,
+    `<section style="margin:7px 0;line-height:1.75;font-size:${theme.body.size};color:${theme.text};text-align:left;">${n}. ${text}</section>`,
 
   square: (text: string, n: number, theme: WechatTheme) =>
-    `<section style="margin:7px 0;line-height:1.75;overflow:hidden;text-align:left;">` +
-    `<span style="display:block;float:left;min-width:22px;height:22px;background:${theme.ol.bg};color:${theme.ol.color};` +
-    `text-align:center;font-size:12px;font-weight:700;line-height:22px;margin-right:10px;">${n}</span>` +
-    `<span style="display:block;overflow:hidden;color:${theme.text};line-height:1.75;">${text}</span></section>`,
+    `<section style="margin:7px 0;line-height:1.75;font-size:${theme.body.size};color:${theme.text};text-align:left;">${n}. ${text}</section>`,
 
   index: (text: string, n: number, theme: WechatTheme) => {
     const label = n < 10 ? `0${n}` : `${n}`
-    return (
-      `<section style="margin:8px 0;line-height:1.75;overflow:hidden;text-align:left;">` +
-      `<span style="display:block;float:left;min-width:32px;` +
-      `font-size:12px;font-weight:700;color:${theme.ol.color};letter-spacing:0.06em;margin-right:8px;line-height:1.75;">${label}</span>` +
-      `<span style="display:block;overflow:hidden;color:${theme.text};line-height:1.75;">${text}</span></section>`
-    )
+    return `<section style="margin:8px 0;line-height:1.75;font-size:${theme.body.size};color:${theme.text};text-align:left;">${label}. ${text}</section>`
   },
 
   plain: (text: string, n: number, theme: WechatTheme) =>
-    `<section style="margin:7px 0;line-height:1.75;overflow:hidden;text-align:left;">` +
-    `<span style="display:block;float:left;min-width:26px;font-weight:700;color:${theme.ol.color};` +
-    `margin-right:6px;line-height:1.75;">${n}.</span>` +
-    `<span style="display:block;overflow:hidden;color:${theme.text};line-height:1.75;">${text}</span></section>`,
+    `<section style="margin:7px 0;line-height:1.75;font-size:${theme.body.size};color:${theme.text};text-align:left;">${n}. ${text}</section>`,
 }
 
 export const renderOlItem = (text: string, n: number, theme: WechatTheme) =>
