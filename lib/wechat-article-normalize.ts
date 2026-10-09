@@ -13,23 +13,6 @@
 
 const ALLOWED_TEXT_ALIGN = new Set(["left", "right", "center", "justify"])
 
-const TEXT_BLOCK_TAGS = new Set([
-  "p",
-  "section",
-  "li",
-  "td",
-  "th",
-  "blockquote",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "article",
-  "figcaption",
-])
-
 const DROP_PROPS = new Set([
   "caret-color",
   "zoom",
@@ -123,16 +106,6 @@ const mayWrap = (el: Element): boolean => {
   return false
 }
 
-const isLikelyDecorativeNoText = (el: Element): boolean => {
-  if (hasVisibleText(el)) return false
-  const kids = Array.from(el.children)
-  if (kids.length === 0) return true
-  return kids.every((k) => {
-    const tag = k.tagName.toLowerCase()
-    return tag === "img" || tag === "br" || tag === "hr"
-  })
-}
-
 /** 单行装饰点（代码块红黄绿）等：字号极小 */
 const isTinyGlyph = (map: Map<string, string>) => {
   const fs = estimateFontPx(map)
@@ -144,16 +117,9 @@ const isFontSizeZero = (map: Map<string, string>) => {
   return fs === "0" || fs === "0px" || fs === "0em" || fs === "0rem"
 }
 
-const normalizeTextAlign = (map: Map<string, string>, el: Element) => {
+const normalizeTextAlign = (map: Map<string, string>) => {
   const raw = map.get("text-align")
-  if (!raw) {
-    const tag = el.tagName.toLowerCase()
-    // 块级文本显式 left，避免复制时浏览器写回 start
-    if (TEXT_BLOCK_TAGS.has(tag) && hasVisibleText(el)) {
-      map.set("text-align", "left")
-    }
-    return
-  }
+  if (!raw) return
   const ta = raw.trim().toLowerCase()
   if (ta === "start" || ta === "-webkit-left" || ta === "-moz-left") {
     map.set("text-align", "left")
@@ -168,15 +134,10 @@ const normalizeTextAlign = (map: Map<string, string>, el: Element) => {
     return
   }
   if (ta === "match-parent" || ta === "inherit" || ta === "initial" || ta === "unset") {
-    map.set("text-align", "left")
+    map.delete("text-align")
     return
   }
-  if (!ALLOWED_TEXT_ALIGN.has(ta)) {
-    map.delete("text-align")
-    if (TEXT_BLOCK_TAGS.has(el.tagName.toLowerCase()) && hasVisibleText(el)) {
-      map.set("text-align", "left")
-    }
-  }
+  if (!ALLOWED_TEXT_ALIGN.has(ta)) map.delete("text-align")
 }
 
 /**
@@ -261,81 +222,41 @@ const normalizeWidth = (map: Map<string, string>, tag: string) => {
 }
 
 /**
- * 对齐官方 Rule A / Rule B：
- * - lh===0 + 有字 → 必改
- * - 有字时保证计算行高 ≥ 0.95 * fontSize（我们统一抬到 1.6，留余量）
- * - 空节点 + lh:0 + font-size:0：保留（图片缝/装饰条）
+ * 只修真正危险的行高，不改主题排版（1.3/1.4/1.9 都合法）。
+ * 官方 Rule A：lh===0 且有字；Rule B：计算行高 < 0.95×字号。
  */
 const normalizeLineHeight = (map: Map<string, string>, el: Element) => {
   const text = hasVisibleText(el)
-
-  // 纯装饰空节点：允许 line-height:0 / font-size:0
-  if (!text) {
-    if (isLikelyDecorativeNoText(el) || isFontSizeZero(map)) return
-    return
-  }
-
-  // 极小装饰点（红黄绿）保留自身字号，但行高不得为 0
-  if (isTinyGlyph(map)) {
-    const lh0 = map.get("line-height")?.trim().toLowerCase()
-    if (lh0 === "0" || lh0 === "0px") map.set("line-height", "1.2")
-    return
-  }
+  if (!text) return
+  if (isTinyGlyph(map) || isFontSizeZero(map)) return
 
   const lh = map.get("line-height")
-  const fontPx = estimateFontPx(map)
-  // 官方阈值：avg < fontSize * 0.95 即违规；安全侧用 1.0× 字号
-  const minPx = fontPx * 1.0
-
-  if (!lh) {
-    const tag = el.tagName.toLowerCase()
-    if (TEXT_BLOCK_TAGS.has(tag) || tag === "span" || tag === "strong" || tag === "em" || tag === "a") {
-      map.set("line-height", "1.6")
-    }
-    return
-  }
+  if (!lh) return
 
   const low = lh.trim().toLowerCase()
-
-  // Rule A：行高 0 + 有字
   if (low === "0" || low === "0px" || low === "0%" || low === "0em" || low === "0rem") {
     map.set("line-height", "1.6")
     return
   }
 
-  if (low === "normal") {
-    map.set("line-height", "1.6")
-    return
-  }
+  const fontPx = estimateFontPx(map)
 
-  // 无单位倍数：计算行高 = n * fontSize，需 n >= 0.95；统一 >= 1.6
   if (/^[\d.]+$/.test(low)) {
     const n = parseFloat(low)
-    if (!Number.isFinite(n) || n < 1.0) map.set("line-height", "1.6")
-    else if (n < 1.5) map.set("line-height", "1.6")
+    if (Number.isFinite(n) && n > 0 && n < 0.95) map.set("line-height", "1.6")
     return
   }
 
   const p = parseLen(low)
-  if (!p) {
+  if (!p) return
+  if (p.unit === "px" && p.num > 0 && p.num < fontPx * 0.95) {
     map.set("line-height", "1.6")
-    return
   }
-
-  if (p.unit === "px") {
-    // 官方：平均行高 < 0.95 * 字号
-    if (p.num < minPx) map.set("line-height", "1.6")
-    return
+  if (p.unit === "%" && p.num > 0 && p.num < 95) {
+    map.set("line-height", "1.6")
   }
-
-  if (p.unit === "%") {
-    if (p.num < 100) map.set("line-height", "1.6")
-    else if (p.num < 150) map.set("line-height", "1.6")
-    return
-  }
-
-  if (p.unit === "em" || p.unit === "rem") {
-    if (p.num < 1.0 || p.num < 1.5) map.set("line-height", "1.6")
+  if ((p.unit === "em" || p.unit === "rem") && p.num > 0 && p.num < 0.95) {
+    map.set("line-height", "1.6")
   }
 }
 
@@ -404,41 +325,6 @@ const normalizeOpacity = (map: Map<string, string>, tag: string) => {
   if (!Number.isNaN(n) && n <= 0) map.delete("opacity")
 }
 
-/**
- * 官方 4.1.2：有文字的节点不要用渐变背景（Dark Mode 难算）
- * 取渐变中第一个实色作为纯色背景。
- */
-const solidifyTextGradients = (map: Map<string, string>, el: Element) => {
-  if (!hasVisibleText(el)) return
-
-  const pickSolid = (css: string): string | null => {
-    if (!/gradient/i.test(css)) return null
-    const colors = css.match(
-      /#(?:[0-9a-fA-F]{3,4}){1,2}\b|rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+(?:\s*,\s*[\d.]+)?\s*\)/g,
-    )
-    if (!colors?.length) return null
-    // 跳过全透明
-    for (const c of colors) {
-      if (/rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*0\s*\)/i.test(c)) continue
-      if (/transparent/i.test(c)) continue
-      return c
-    }
-    return colors[0]
-  }
-
-  for (const key of ["background", "background-image"] as const) {
-    const v = map.get(key)
-    if (!v) continue
-    const solid = pickSolid(v)
-    if (!solid) continue
-    map.delete("background-image")
-    map.set("background", solid)
-    map.delete("background-size")
-    map.delete("background-repeat")
-    map.delete("background-position")
-  }
-}
-
 /** 空背景声明删掉：公众号会把 transparent 当成一块底 */
 const stripEmptyBackgrounds = (map: Map<string, string>) => {
   const empty = (v: string) => {
@@ -485,22 +371,18 @@ const normalizeElementStyle = (el: Element) => {
         "width:100%;max-width:100%;border-collapse:collapse;box-sizing:border-box",
       )
     }
-    if (TEXT_BLOCK_TAGS.has(tag) && hasVisibleText(el)) {
-      el.setAttribute("style", "text-align:left;line-height:1.6")
-    }
     return
   }
 
   const map = parseDecls(raw)
   DROP_PROPS.forEach((p) => map.delete(p))
 
-  normalizeTextAlign(map, el)
+  normalizeTextAlign(map)
   normalizeWidth(map, tag)
   normalizeLineHeight(map, el)
   normalizeHeight(map, el)
   normalizeWhiteSpace(map, tag, el)
   normalizeOpacity(map, tag)
-  solidifyTextGradients(map, el)
   stripEmptyBackgrounds(map)
 
   const pos = map.get("position")?.toLowerCase()
